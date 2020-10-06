@@ -20,20 +20,8 @@ export const input = {
   uniform sampler2D u_filter;
   out vec4 outColor;
 
-  float convolve(mat4 region, mat4 f){
-    mat4 res = matrixCompMult(region, f);
-    float sum = 0.0;
-    for(int i=0; i<4; i++){
-      sum += res[i].x;
-      sum += res[i].y;
-      sum += res[i].z;
-      sum += res[i].w;
-    }
-    return sum;
-  }
-
   vec4 get(vec2 offset){
-    return texture(u_texture, (v_texcoord + offset));// * texture(u_filter, offset);
+    return texture(u_texture, (v_texcoord + offset)) * texture(u_filter, offset);
   } 
 
   void main() {
