@@ -7,7 +7,15 @@ import {
   generateLine,
   filter,
 } from './functions.js';
-import { input, process, output } from './shaders.js';
+
+const input = {
+  vs: require('./glsl/input_vert.glsl'),
+  fs: require('./glsl/input_frag.glsl'),
+};
+const process = {
+  vs: require('./glsl/process_vert.glsl'),
+  fs: require('./glsl/process_frag.glsl'),
+};
 
 const canvas = document.getElementById('c');
 const gl = canvas.getContext('webgl2');
@@ -52,8 +60,8 @@ gl.texImage2D(
   gl.RGB,
   gl.UNSIGNED_BYTE,
   //generateImageData(32, 32, 3, 100)
-  //generateGradient(32, 32, 3)
-  generateLine(32, 32, 3)
+  generateGradient(32, 32, 3)
+  //generateLine(32, 32, 3)
 );
 gl.generateMipmap(gl.TEXTURE_2D);
 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);

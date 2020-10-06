@@ -24,6 +24,10 @@ module.exports = {
         test: /\.css$/,
         use: [MiniCssExtractPlugin.loader, 'WebGL ConvNet'],
       },
+      {
+        test: /\.glsl$/i,
+        loader: ['webpack-glsl-loader'],
+      },
     ],
   },
   output: {

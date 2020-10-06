@@ -25,19 +25,20 @@ export const input = {
   } 
 
   void main() {
-    if(mod(v_texcoord.x, 2.0) == 1.0 || mod(v_texcoord.y, 2.0) == 1.0) discard;
     if(v_texcoord.x > 32.0 - 4.0) discard;
-    if(v_texcoord.y > 32.0 - 4.0) discard;
+    else if(v_texcoord.y > 32.0 - 4.0) discard;
+    else if(mod(v_texcoord.x, 2.0) == 1.0 || mod(v_texcoord.y, 2.0) == 1.0) discard;
+    else {
+      vec4 sum = vec4(0.0);
+      for(float y=0.0; y<4.0; y+=1.0){
+        sum += get(vec2(0.0, y));
+        sum += get(vec2(1.0, y));
+        sum += get(vec2(2.0, y));
+        sum += get(vec2(3.0, y));
+      }
 
-    vec4 sum = vec4(0.0);
-    for(float y=0.0; y<4.0; y+=1.0){
-      sum += get(vec2(0.0, y));
-      sum += get(vec2(1.0, y));
-      sum += get(vec2(2.0, y));
-      sum += get(vec2(3.0, y));
+      outColor = sum * 0.0625; // 1/16
     }
-
-    outColor = sum * 0.0625; // 1/16
   }
 `,
 };
