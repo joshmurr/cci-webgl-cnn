@@ -2,8 +2,10 @@ import {
   createProgram,
   createShader,
   createTexture,
-  generate3DData,
+  generateGradient,
   generateImageData,
+  generateLine,
+  filter,
 } from './functions.js';
 import { input, process, output } from './shaders.js';
 
@@ -49,7 +51,9 @@ gl.texImage2D(
   0,
   gl.RGB,
   gl.UNSIGNED_BYTE,
-  generateImageData(32, 32, 3)
+  //generateImageData(32, 32, 3, 100)
+  //generateGradient(32, 32, 3)
+  generateLine(32, 32, 3)
 );
 gl.generateMipmap(gl.TEXTURE_2D);
 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
@@ -70,7 +74,7 @@ gl.texImage2D(
   0,
   gl.RGB,
   gl.UNSIGNED_BYTE,
-  generateImageData(4, 4, 3)
+  filter()
 );
 gl.generateMipmap(gl.TEXTURE_2D);
 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
@@ -165,6 +169,7 @@ function draw(gl) {
   gl.bindTexture(gl.TEXTURE_2D, INPUT_filter);
 
   gl.viewport(0, 0, 16, 16);
+  //gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
   gl.clearColor(0, 0, 1, 1);
   gl.drawArrays(gl.TRIANGLES, 0, verts.length / 2);
   // ----------------

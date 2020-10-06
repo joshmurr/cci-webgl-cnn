@@ -54,22 +54,63 @@ export function createTexture(gl, program, idx, color) {
   return texture;
 }
 
-export function generateImageData(w, h, num_channels) {
+export function generateImageData(w, h, num_channels, value = null) {
   let data = new Uint8Array(w * h * num_channels);
   for (let i = 0; i < w * num_channels; i += num_channels)
     for (let j = 0; j < h; j++)
       for (let c = 0; c < num_channels; c++) {
-        data[i + w * num_channels * j + c] = Math.floor(Math.random() * 255);
+        data[i + w * num_channels * j + c] = value
+          ? value
+          : Math.floor(Math.random() * 255);
       }
   return data;
 }
 
-export function generate3DData(w, h, d) {
+export function generateGradient(w, h, d) {
   let data = new Uint8Array(w * h * d);
-  for (let i = 0; i < w; i++)
-    for (let j = 0; j < h; j++)
-      for (let k = 0; k < h; k++) {
-        data[i + w * j + w * h * k] = Math.floor(Math.random() * 255);
+  let counter = 0;
+  for (let i = 0; i < w; i++) {
+    for (let j = 0; j < h; j++) {
+      for (let k = 0; k < d; k++) {
+        data[i + w * j + w * h * k] = counter++ % 255;
       }
+    }
+  }
   return data;
+}
+
+export function generateLine(w, h, d) {
+  let data = new Uint8Array(w * h * d);
+  const B = [0, 0, 0];
+  const W = [255, 255, 255];
+  for (let i = 0; i < data.length; i += 3) {
+    const c = (i / 3) % w < w / 2 ? B : W;
+    data.set(c, i);
+  }
+  return data;
+}
+
+export function filter() {
+  // Red Filter
+  let filter = [
+    255, 0, 0,
+    255, 0, 0,
+    255, 0, 0,
+    255, 0, 0,
+    255, 0, 0,
+    255, 0, 0,
+    255, 0, 0,
+    255, 0, 0,
+    255, 0, 0,
+    255, 0, 0,
+    255, 0, 0,
+    255, 0, 0,
+    255, 0, 0,
+    255, 0, 0,
+    255, 0, 0,
+    255, 0, 0,
+    255, 0, 0,
+
+  ]; //prettier-ignore
+  return new Uint8Array(filter);
 }
