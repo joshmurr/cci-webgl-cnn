@@ -10,17 +10,15 @@ export const input = {
     v_texcoord = a_texcoord;
   }
   `,
+
   fs: `#version 300 es
   precision highp float;
   precision highp sampler2D;
    
   in vec2 v_texcoord;
   uniform sampler2D u_texture;
+  uniform sampler2D u_filter;
   out vec4 outColor;
-
-  const int width = 32;
-  const int height = 32;
-  const int depth = 3;
 
   const mat4 f = mat4(-2.0, -1.2, -1.2, -2.0,  // First Column
                       -1.0, -0.2, -0.2, -1.0,  // Second Column
@@ -39,31 +37,52 @@ export const input = {
     return sum;
   }
 
-  int get(vec2 offset){
-    return int(texture(u_texture, (gl_FragCoord.xy + offset)));
+  vec4 get(vec2 offset){
+    return texture(u_texture, (v_texcoord + offset));
   } 
 
   void main() {
-    mat4 region = mat4(0.0);
-    for(int row=0; row<4; row++){
-      region[row] = vec4(
-        get(vec2(row, 0.0)),
-        get(vec2(row, 1.0)),
-        get(vec2(row, 2.0)),
-        get(vec2(row, 3.0))
-      );
+    if(mod(v_texcoord.x, 2.0) == 1.0 || mod(v_texcoord.y, 2.0) == 1.0) discard;
+    if(v_texcoord.x > 32.0 - 4.0) discard;
+    if(v_texcoord.y > 32.0 - 4.0) discard;
+
+    vec4 sum = vec4(0.0);
+    for(float y=0.0; y<4.0; y+=1.0){
+      sum += get(vec2(0.0, y));
+      sum += get(vec2(1.0, y));
+      sum += get(vec2(2.0, y));
+      sum += get(vec2(3.0, y));
     }
 
-    outColor = texture(u_texture, v_texcoord, 0.0);
+    outColor = sum * 0.25;
   }
 `,
 };
 
 export const process = {
   vs: `#version 300 es
+  in vec4 a_position;
+  in vec2 a_texcoord;
+
+  out vec2 v_texcoord;
+
+  void main() {
+    gl_Position = a_position;
+    v_texcoord = a_texcoord;
+  }
 
   `,
   fs: `#version 300 es
+  precision highp float;
+  precision highp sampler2D;
+
+  in vec2 v_texcoord;
+  uniform sampler2D u_texture;
+  out vec4 outColor;
+
+  void main(){
+    outColor = texture(u_texture, v_texcoord);
+  }
 
   `,
 };
