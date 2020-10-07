@@ -5,7 +5,12 @@ import {
   generateGradient,
   generateImageData,
   generateLine,
+  generateFour,
   filter,
+  diagFilter,
+  diagFilterOpp,
+  sidesFilter,
+  topBottomFilter,
 } from './functions.js';
 
 const input = {
@@ -22,8 +27,8 @@ const gl = canvas.getContext('webgl2');
 
 if (!gl) console.error('No WebGL2 support!');
 
-const verts =      [-1, -1, 1, -1, -1, 1,   -1, 1, 1, -1, 1, 1]; //prettier-ignore
-const tex_coords = [ 0,  0, 0,  1,  1, 0,    1, 0, 0,  1, 1, 1]; //prettier-ignore
+const verts =      [-1, -1, -1, 1,  1, -1,   -1, 1, 1,  1, 1, -1]; //prettier-ignore
+const tex_coords = [ 0,  1,  0, 0,  1,  1,    0, 0, 1,  0, 1,  1]; //prettier-ignore
 
 // INPUT PROGRAM ----------------------------------------------------------
 const INPUT = createProgram(gl, input.vs, input.fs);
@@ -60,8 +65,9 @@ gl.texImage2D(
   gl.RGB,
   gl.UNSIGNED_BYTE,
   //generateImageData(32, 32, 3, 100)
-  generateGradient(32, 32, 3)
+  //generateGradient(32, 32, 3)
   //generateLine(32, 32, 3)
+  generateFour()
 );
 gl.generateMipmap(gl.TEXTURE_2D);
 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
@@ -82,7 +88,8 @@ gl.texImage2D(
   0,
   gl.RGB,
   gl.UNSIGNED_BYTE,
-  filter()
+  sidesFilter()
+  //topBottomFilter()
 );
 gl.generateMipmap(gl.TEXTURE_2D);
 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
@@ -131,16 +138,16 @@ gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 
-const CONV_tex = gl.createTexture();
-gl.bindTexture(gl.TEXTURE_2D, CONV_tex);
+const CONV2D_tex = gl.createTexture();
+gl.bindTexture(gl.TEXTURE_2D, CONV2D_tex);
 gl.texImage2D(
   gl.TEXTURE_2D,
   0,
-  gl.RGB8,
+  gl.R8,
   16 * 1,
   16,
   0,
-  gl.RGB,
+  gl.RED,
   gl.UNSIGNED_BYTE,
   null
 );
@@ -155,7 +162,7 @@ gl.framebufferTexture2D(
   gl.FRAMEBUFFER,
   gl.COLOR_ATTACHMENT0,
   gl.TEXTURE_2D,
-  CONV_tex,
+  CONV2D_tex,
   0
 );
 
@@ -163,11 +170,11 @@ gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 gl.bindVertexArray(null);
 gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
-function draw(gl) {
+function draw(gl, process = true) {
   // INPUT ----------
   gl.useProgram(INPUT);
   gl.bindVertexArray(INPUT_vao);
-  gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
+  if (process) gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
 
   gl.uniform1i(INPUT_texLoc, 0);
   gl.uniform1i(INPUT_filterLoc, 1);
@@ -176,28 +183,31 @@ function draw(gl) {
   gl.activeTexture(gl.TEXTURE0 + 1);
   gl.bindTexture(gl.TEXTURE_2D, INPUT_filter);
 
-  gl.viewport(0, 0, 16, 16);
-  //gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+  if (process) gl.viewport(0, 0, 16, 16);
+  else gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+
   gl.clearColor(0, 0, 1, 1);
   gl.drawArrays(gl.TRIANGLES, 0, verts.length / 2);
   // ----------------
 
-  gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-  gl.bindVertexArray(null);
-  gl.bindBuffer(gl.ARRAY_BUFFER, null);
+  if (process) {
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    gl.bindVertexArray(null);
+    gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
-  // PROCESS --------
-  gl.useProgram(PROCESS);
-  gl.bindVertexArray(PROCESS_vao);
+    // PROCESS --------
+    gl.useProgram(PROCESS);
+    gl.bindVertexArray(PROCESS_vao);
 
-  gl.uniform1i(PROCESS_texLoc, 0);
-  gl.activeTexture(gl.TEXTURE0 + 0);
-  gl.bindTexture(gl.TEXTURE_2D, CONV_tex);
+    gl.uniform1i(PROCESS_texLoc, 0);
+    gl.activeTexture(gl.TEXTURE0 + 0);
+    gl.bindTexture(gl.TEXTURE_2D, CONV2D_tex);
 
-  gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
-  gl.clearColor(0, 0, 1, 1);
-  gl.clear(gl.COLOR_BUFFER_BIT);
-  gl.drawArrays(gl.TRIANGLES, 0, verts.length / 2);
+    gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+    gl.clearColor(0, 0, 1, 1);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.drawArrays(gl.TRIANGLES, 0, verts.length / 2);
+  }
 }
 
-draw(gl);
+draw(gl, true);
