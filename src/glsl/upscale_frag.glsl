@@ -15,18 +15,15 @@ vec3 get(vec2 offset){
 } 
 
 void main(){
-    vec3 sum_row = vec3(0.0);
-    for(float y=-1.5; y<2.0; y+=1.0){
-      sum_row += get(vec2(-1.5, y));
-      sum_row += get(vec2(-0.5, y));
-      sum_row += get(vec2(0.5, y) );
-      sum_row += get(vec2(1.5, y) );
-    }
+  vec3 sum_row = vec3(0.0);
+  for(float y=-1.5; y<2.0; y+=1.0){
+    sum_row += get(vec2(-1.5, y));
+    sum_row += get(vec2(-0.5, y));
+    sum_row += get(vec2(0.5,  y));
+    sum_row += get(vec2(1.5,  y));
+  }
 
-    float sum = dot(sum_row * 0.0625, vec3(1.0)) * 0.333; // Sum vector components and average.
-  //outColor = texture(u_texture, gl_FragCoord.xy / 32.0);
+  float sum = dot(sum_row * 0.0625, vec3(1.0)) * 0.333; // Sum vector components and average.
   outColor = vec4(vec3(sum), 1.0);
-  //if(gl_FragCoord.x > 16.0) outColor = vec4(1.0, 0.0, 0.0, 1.0);
-  //else outColor = vec4(0.1, 0.0, 0.0, 1.0);
 }
 
