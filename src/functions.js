@@ -151,7 +151,6 @@ export function filter() {
 }
 
 export function diagFilter() {
-  // Red Filter
   let filter = [
     255, 255, 255,    0,   0,   0,    0,   0,   0,    0,   0,   0,
       0,   0,   0,  255, 255, 255,    0,   0,   0,  255, 255, 255,
@@ -162,7 +161,6 @@ export function diagFilter() {
 }
 
 export function diagFilterOpp() {
-  // Red Filter
   let filter = [
       0,   0,   0,    0,   0,   0,    0,   0,   0,  255, 255, 255,
     255, 255, 255,    0,   0,   0,  255, 255, 255,    0,   0,   0,
@@ -172,7 +170,6 @@ export function diagFilterOpp() {
   return new Uint8Array(filter);
 }
 export function sidesFilter() {
-  // Red Filter
   let filter = [
       0,   0,  0, 128, 128, 128, 128, 128, 128,  255, 255, 255,
       0,   0,  0, 128, 128, 128, 128, 128, 128,  255, 255, 255,
@@ -185,10 +182,10 @@ export function sidesFilter() {
 export function topBottomFilter() {
   // Red Filter
   let filter = [
-    255, 255, 255,255, 255, 255,255, 255, 255,255, 255, 255,
-    128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 
-    128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 
+    98, 98, 98,128, 128, 128,128, 128, 128,98, 98, 98,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+    200, 200, 200,255, 255, 255,255, 255, 255,200, 200, 200,
 
   ]; //prettier-ignore
   return new Uint8Array(filter);

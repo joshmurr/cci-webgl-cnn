@@ -183,10 +183,6 @@ gl.enableVertexAttribArray(OUTPUT_posAttrLoc);
 gl.vertexAttribPointer(OUTPUT_posAttrLoc, 2, gl.FLOAT, false, 0, 0);
 
 const OUTPUT_resolutionLoc = gl.getUniformLocation(OUTPUT, 'u_resolution');
-const OUTPUT_screen_resolutionLoc = gl.getUniformLocation(
-  OUTPUT,
-  'u_screen_resolution'
-);
 
 // Texture Coords
 const OUTPUT_texAttrLoc = gl.getAttribLocation(OUTPUT, 'a_texcoord');
@@ -326,21 +322,20 @@ function draw(gl, process = true) {
   gl.activeTexture(gl.TEXTURE0 + 0);
   gl.bindTexture(gl.TEXTURE_2D, CONV2D_transpose_tex);
 
-  //gl.uniform2f(OUTPUT_screen_resolutionLoc, gl.canvas.width, gl.canvas.height);
   gl.enable(gl.SCISSOR_TEST);
   //gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
   //gl.scissor(0, 0, gl.canvas.width, gl.canvas.height);
-  //gl.uniform2f(OUTPUT_resolutionLoc, 100, 100);
-  gl.viewport(0, 16, 512, 512 + 16);
-  gl.scissor(0, 16, 512, 512 + 16);
+  gl.uniform2f(OUTPUT_resolutionLoc, 512, 512);
+  gl.viewport(0, 0, 512, 512);
+  gl.scissor(0, 0, 512, 512);
   gl.clear(gl.COLOR_BUFFER_BIT);
   gl.drawArrays(gl.TRIANGLES, 0, verts.length / 2);
+  console.log(gl.getParameter(gl.SCISSOR_BOX));
 
-  gl.uniform2f(OUTPUT_resolutionLoc, 50, 50);
   gl.bindTexture(gl.TEXTURE_2D, DOWNSCALE_filter);
-  gl.viewport(0, 0, 16, 16);
-  gl.scissor(0, 0, 16, 16);
-  gl.clearColor(1.0, 1.0, 0.0, 1.0);
+  gl.viewport(0, 0, 50, 50);
+  gl.scissor(0, 0, 50, 50);
+  gl.clearColor(1.0, 1.0, 1.0, 1.0);
   gl.drawArrays(gl.TRIANGLES, 0, verts.length / 2);
 
   // ----------------
@@ -350,23 +345,4 @@ function draw(gl, process = true) {
   gl.bindBuffer(gl.ARRAY_BUFFER, null);
 }
 
-function resize(gl) {
-  // https://webglfundamentals.org/webgl/lessons/webgl-resizing-the-canvas.html
-  var realToCSSPixels = window.devicePixelRatio;
-
-  // Lookup the size the browser is displaying the canvas in CSS pixels
-  // and compute a size needed to make our drawingbuffer match it in
-  // device pixels.
-  var displayWidth = Math.floor(gl.canvas.clientWidth * realToCSSPixels);
-  var displayHeight = Math.floor(gl.canvas.clientHeight * realToCSSPixels);
-
-  // Check if the canvas is not the same size.
-  if (gl.canvas.width !== displayWidth || gl.canvas.height !== displayHeight) {
-    // Make the canvas the same size
-    gl.canvas.width = displayWidth;
-    gl.canvas.height = displayHeight;
-  }
-}
-
-resize(gl);
 draw(gl, true);
