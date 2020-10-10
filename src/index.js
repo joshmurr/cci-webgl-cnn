@@ -82,6 +82,8 @@ gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 
+//let filt = new Uint8Array(4 * NUM_FILTERS * 4 * NUM_FILTERS * 3);
+
 const DOWNSCALE_filterLoc = gl.getUniformLocation(DOWNSCALE, 'u_filter');
 const DOWNSCALE_filter = gl.createTexture();
 gl.activeTexture(gl.TEXTURE0 + 1);
@@ -95,6 +97,7 @@ gl.texImage2D(
   0,
   gl.RGB,
   gl.UNSIGNED_BYTE,
+  //filt
   //diagFilter()
   //sidesFilter()
   //topBottomFilter()
@@ -325,7 +328,11 @@ function draw(gl, process = true) {
     1 / (4 * NUM_FILTERS)
   );
   gl.uniform2f(DOWNSCALE_input_texel_size_loc, 1 / 32, 1 / 32);
-  gl.uniform2f(DOWNSCALE_output_size_loc, 16, 16);
+  gl.uniform2f(
+    DOWNSCALE_output_size_loc,
+    DOWNSCALE_output_size,
+    DOWNSCALE_output_size
+  );
 
   gl.clearColor(0, 0, 1, 1);
   gl.drawArrays(gl.TRIANGLES, 0, verts.length / 2);
