@@ -99,7 +99,7 @@ gl.texImage2D(
     4 * DOWNSCALE_NUM_FILTERS,
     4 * DOWNSCALE_NUM_FILTERS,
     3,
-    255
+    0
   )
 );
 gl.generateMipmap(gl.TEXTURE_2D);
@@ -116,9 +116,9 @@ const DOWNSCALE_filter_texel_size_loc = gl.getUniformLocation(
   DOWNSCALE,
   'u_filter_texel_size'
 );
-const DOWNSCALE_output_texel_size_loc = gl.getUniformLocation(
+const DOWNSCALE_input_texel_size_loc = gl.getUniformLocation(
   DOWNSCALE,
-  'u_output_texel_size'
+  'u_input_texel_size'
 );
 const DOWNSCALE_output_size_loc = gl.getUniformLocation(
   DOWNSCALE,
@@ -149,7 +149,7 @@ gl.texImage2D(
   gl.TEXTURE_2D,
   0,
   gl.RGB8,
-  16,
+  16 * 1,
   16,
   0,
   gl.RGB,
@@ -170,7 +170,7 @@ gl.texImage2D(
   gl.TEXTURE_2D,
   0,
   gl.R8,
-  4 * DOWNSCALE_NUM_FILTERS * UPSCALE_NUM_FILTERS,
+  4 * DOWNSCALE_NUM_FILTERS * 3,
   4 * DOWNSCALE_NUM_FILTERS,
   0,
   gl.RED,
@@ -179,12 +179,7 @@ gl.texImage2D(
   //sidesFilter()
   //topBottomFilter()
   //filter()
-  generateImageData(
-    4 * DOWNSCALE_NUM_FILTERS * UPSCALE_NUM_FILTERS,
-    4 * DOWNSCALE_NUM_FILTERS,
-    1,
-    0
-  )
+  generateImageData(4 * DOWNSCALE_NUM_FILTERS * 3, 4 * DOWNSCALE_NUM_FILTERS, 1)
 );
 gl.generateMipmap(gl.TEXTURE_2D);
 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
@@ -345,7 +340,7 @@ function draw(gl, process = true) {
     1 / (4 * DOWNSCALE_NUM_FILTERS)
   );
   gl.uniform2f(
-    DOWNSCALE_output_texel_size_loc,
+    DOWNSCALE_input_texel_size_loc,
     1 / DOWNSCALE_output_size,
     1 / DOWNSCALE_output_size
   );
@@ -376,15 +371,15 @@ function draw(gl, process = true) {
   gl.uniform2f(UPSCALE_filter_size_loc, 4, 4);
   gl.uniform2f(
     UPSCALE_filter_texel_size_loc,
-    1 / (4 * DOWNSCALE_NUM_FILTERS * UPSCALE_NUM_FILTERS),
-    1 / (4 * DOWNSCALE_NUM_FILTERS)
+    1 / (4 * UPSCALE_NUM_FILTERS),
+    1 / (4 * UPSCALE_NUM_FILTERS)
   );
+  gl.uniform2f(UPSCALE_input_texel_size_loc, 1 / 64, 1 / 64);
   gl.uniform2f(
-    UPSCALE_input_texel_size_loc,
-    1 / (DOWNSCALE_NUM_FILTERS * DOWNSCALE_output_size),
-    1 / (DOWNSCALE_NUM_FILTERS * DOWNSCALE_output_size)
+    UPSCALE_num_filters_loc,
+    UPSCALE_NUM_FILTERS,
+    UPSCALE_NUM_FILTERS
   );
-  gl.uniform2f(UPSCALE_num_filters_loc, UPSCALE_NUM_FILTERS, 1);
   gl.uniform2f(
     UPSCALE_num_filters_prev_loc,
     DOWNSCALE_NUM_FILTERS,
@@ -392,8 +387,8 @@ function draw(gl, process = true) {
   );
   gl.uniform2f(
     UPSCALE_input_size_loc,
-    DOWNSCALE_output_size, // 16
-    DOWNSCALE_output_size // 16
+    DOWNSCALE_output_size, // 16 --  // * DOWNSCALE_NUM_FILTERS, // 64
+    DOWNSCALE_output_size // 16 --  // * DOWNSCALE_NUM_FILTERS, // 64
   );
   gl.uniform2f(
     UPSCALE_output_size_loc,
@@ -401,7 +396,7 @@ function draw(gl, process = true) {
     UPSCALE_output_size
   );
 
-  gl.viewport(0, 0, UPSCALE_output_size, UPSCALE_output_size);
+  gl.viewport(0, 0, 32, 32);
   gl.clearColor(0, 0, 1, 1);
   gl.drawArrays(gl.TRIANGLES, 0, verts.length / 2);
   // ----------------------------------------------
