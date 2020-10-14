@@ -34,8 +34,10 @@ if (!gl) console.error('No WebGL2 support!');
 
 const verts =      [-1, -1, -1, 1,  1, -1,   -1, 1, 1,  1, 1, -1]; //prettier-ignore
 const tex_coords = [ 0,  1,  0, 0,  1,  1,    0, 0, 1,  0, 1,  1]; //prettier-ignore
-const NUM_FILTERS = 8;
+const DOWNSCALE_NUM_FILTERS = 2;
+const UPSCALE_NUM_FILTERS = 3;
 const DOWNSCALE_output_size = 16;
+const UPSCALE_output_size = 32;
 
 // DOWNSCALE PROGRAM ----------------------------------------------------------
 const DOWNSCALE = createProgram(gl, downscale.vs, downscale.fs);
@@ -47,14 +49,6 @@ gl.bindBuffer(gl.ARRAY_BUFFER, DOWNSCALE_positionBuffer);
 gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(verts), gl.STATIC_DRAW);
 gl.enableVertexAttribArray(DOWNSCALE_posAttrLoc);
 gl.vertexAttribPointer(DOWNSCALE_posAttrLoc, 2, gl.FLOAT, false, 0, 0);
-
-// Texture Coords
-//const DOWNSCALE_texattrloc = gl.getAttribLocation(DOWNSCALE, 'a_texcoord');
-//const DOWNSCALE_texbuffer = gl.createBuffer();
-//gl.bindBuffer(gl.ARRAY_BUFFER, DOWNSCALE_texbuffer);
-//gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(tex_coords), gl.STATIC_DRAW);
-//gl.enableVertexAttribArray(DOWNSCALE_texattrloc);
-//gl.vertexAttribPointer(DOWNSCALE_texattrloc, 2, gl.FLOAT, false, 0, 0);
 
 // DOWNSCALE TEXTURE: 32x32x3
 const DOWNSCALE_texLoc = gl.getUniformLocation(DOWNSCALE, 'u_texture');
@@ -71,7 +65,7 @@ gl.texImage2D(
   0,
   gl.RGB,
   gl.UNSIGNED_BYTE,
-  //generateImageData(32, 32, 3)
+  //generateImageData(32, 32, 3, 0)
   //generateGradient(32, 32, 3)
   //generateLine(32, 32, 3)
   generateFour()
@@ -82,8 +76,6 @@ gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 
-//let filt = new Uint8Array(4 * NUM_FILTERS * 4 * NUM_FILTERS * 3);
-
 const DOWNSCALE_filterLoc = gl.getUniformLocation(DOWNSCALE, 'u_filter');
 const DOWNSCALE_filter = gl.createTexture();
 gl.activeTexture(gl.TEXTURE0 + 1);
@@ -92,17 +84,17 @@ gl.texImage2D(
   gl.TEXTURE_2D,
   0,
   gl.RGB8,
-  4 * NUM_FILTERS,
-  4 * NUM_FILTERS,
+  4 * DOWNSCALE_NUM_FILTERS,
+  4 * DOWNSCALE_NUM_FILTERS,
   0,
   gl.RGB,
   gl.UNSIGNED_BYTE,
   //filt
   //diagFilter()
-  //sidesFilter()
+  sidesFilter(DOWNSCALE_NUM_FILTERS)
   //topBottomFilter()
   //filter()
-  generateImageData(4 * NUM_FILTERS, 4 * NUM_FILTERS, 3, 0)
+  //generateImageData(4 * DOWNSCALE_NUM_FILTERS, 4 * DOWNSCALE_NUM_FILTERS, 3, 0)
 );
 gl.generateMipmap(gl.TEXTURE_2D);
 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
@@ -138,14 +130,6 @@ gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(verts), gl.STATIC_DRAW);
 gl.enableVertexAttribArray(UPSCALE_posAttrLoc);
 gl.vertexAttribPointer(UPSCALE_posAttrLoc, 2, gl.FLOAT, false, 0, 0);
 
-// Texture Coords
-const UPSCALE_texAttrLoc = gl.getAttribLocation(UPSCALE, 'a_texcoord');
-const UPSCALE_texBuffer = gl.createBuffer();
-gl.bindBuffer(gl.ARRAY_BUFFER, UPSCALE_texBuffer);
-gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(tex_coords), gl.STATIC_DRAW);
-gl.enableVertexAttribArray(UPSCALE_texAttrLoc);
-gl.vertexAttribPointer(UPSCALE_texAttrLoc, 2, gl.FLOAT, false, 0, 0);
-
 // UPSCALE TEXTURE: 16x16x1
 const UPSCALE_texLoc = gl.getUniformLocation(UPSCALE, 'u_texture');
 const UPSCALE_tex = gl.createTexture();
@@ -175,23 +159,40 @@ gl.bindTexture(gl.TEXTURE_2D, UPSCALE_filter);
 gl.texImage2D(
   gl.TEXTURE_2D,
   0,
-  gl.RGB8,
-  4,
-  4,
+  gl.R8,
+  4 * DOWNSCALE_NUM_FILTERS * 3,
+  4 * DOWNSCALE_NUM_FILTERS,
   0,
-  gl.RGB,
+  gl.RED,
   gl.UNSIGNED_BYTE,
   //diagFilter()
   //sidesFilter()
   //topBottomFilter()
-  filter()
-  //generateImageData(4, 4, 3)
+  //filter()
+  generateImageData(4 * DOWNSCALE_NUM_FILTERS * 3, 4 * DOWNSCALE_NUM_FILTERS, 1)
 );
 gl.generateMipmap(gl.TEXTURE_2D);
 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+const UPSCALE_filter_size_loc = gl.getUniformLocation(UPSCALE, 'u_filter_size');
+const UPSCALE_filter_texel_size_loc = gl.getUniformLocation(
+  UPSCALE,
+  'u_filter_texel_size'
+);
+const UPSCALE_input_texel_size_loc = gl.getUniformLocation(
+  UPSCALE,
+  'u_input_texture_size'
+);
+const UPSCALE_num_filters_loc = gl.getUniformLocation(UPSCALE, 'u_num_filters');
+const UPSCALE_num_filters_prev_loc = gl.getUniformLocation(
+  UPSCALE,
+  'u_num_filters_prev'
+);
+const UPSCALE_input_size_loc = gl.getUniformLocation(UPSCALE, 'u_input_size');
+const UPSCALE_output_size_loc = gl.getUniformLocation(UPSCALE, 'u_output_size');
 
 // OUTPUT PROGRAM --------------------------------------------------------
 const OUTPUT = createProgram(gl, output.vs, output.fs);
@@ -247,8 +248,8 @@ gl.texImage2D(
   gl.TEXTURE_2D,
   0,
   gl.R8,
-  DOWNSCALE_output_size * NUM_FILTERS,
-  DOWNSCALE_output_size * NUM_FILTERS,
+  DOWNSCALE_output_size * DOWNSCALE_NUM_FILTERS,
+  DOWNSCALE_output_size * DOWNSCALE_NUM_FILTERS,
   0,
   gl.RED,
   gl.UNSIGNED_BYTE,
@@ -264,11 +265,11 @@ gl.bindTexture(gl.TEXTURE_2D, CONV2D_transpose_tex);
 gl.texImage2D(
   gl.TEXTURE_2D,
   0,
-  gl.R8,
+  gl.RGB8,
   32,
   32,
   0,
-  gl.RED,
+  gl.RGB,
   gl.UNSIGNED_BYTE,
   null
 );
@@ -302,7 +303,8 @@ gl.bindVertexArray(null);
 gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
 function draw(gl, process = true) {
-  // DOWNSCALE ----------
+  // DOWNSCALE ----------------------------------------
+  // Outputs to CONV2D_tex (16*DOWNSCALE_NUM_FILTERS x 16*DOWNSCALE_NUM_FILTERS x 1)
   gl.useProgram(DOWNSCALE);
   gl.bindVertexArray(DOWNSCALE_vao);
   gl.bindFramebuffer(gl.FRAMEBUFFER, DOWNSCALE_framebuffer);
@@ -317,15 +319,15 @@ function draw(gl, process = true) {
   gl.viewport(
     0,
     0,
-    DOWNSCALE_output_size * NUM_FILTERS,
-    DOWNSCALE_output_size * NUM_FILTERS
+    DOWNSCALE_output_size * DOWNSCALE_NUM_FILTERS,
+    DOWNSCALE_output_size * DOWNSCALE_NUM_FILTERS
   );
 
   gl.uniform2f(DOWNSCALE_filter_size_loc, 4, 4);
   gl.uniform2f(
     DOWNSCALE_filter_texel_size_loc,
-    1 / (4 * NUM_FILTERS),
-    1 / (4 * NUM_FILTERS)
+    1 / (4 * DOWNSCALE_NUM_FILTERS),
+    1 / (4 * DOWNSCALE_NUM_FILTERS)
   );
   gl.uniform2f(DOWNSCALE_input_texel_size_loc, 1 / 32, 1 / 32);
   gl.uniform2f(
@@ -336,9 +338,10 @@ function draw(gl, process = true) {
 
   gl.clearColor(0, 0, 1, 1);
   gl.drawArrays(gl.TRIANGLES, 0, verts.length / 2);
-  // ----------------
+  // ----------------------------------------------
 
-  // UPSCALE --------
+  // UPSCALE --------------------------------------
+  // Outputs to CONV2D_transpose_tex (32x32x3)
   gl.useProgram(UPSCALE);
   gl.bindVertexArray(UPSCALE_vao);
   gl.bindFramebuffer(gl.FRAMEBUFFER, UPSCALE_framebuffer);
@@ -350,33 +353,82 @@ function draw(gl, process = true) {
   gl.activeTexture(gl.TEXTURE0 + 1);
   gl.bindTexture(gl.TEXTURE_2D, UPSCALE_filter);
 
+  gl.uniform2f(UPSCALE_filter_size_loc, 4, 4);
+  gl.uniform2f(
+    UPSCALE_filter_texel_size_loc,
+    1 / (4 * UPSCALE_NUM_FILTERS),
+    1 / (4 * UPSCALE_NUM_FILTERS)
+  );
+  gl.uniform2f(UPSCALE_input_texel_size_loc, 1 / 64, 1 / 64);
+  gl.uniform2f(
+    UPSCALE_num_filters_loc,
+    UPSCALE_NUM_FILTERS,
+    UPSCALE_NUM_FILTERS
+  );
+  gl.uniform2f(
+    UPSCALE_num_filters_prev_loc,
+    DOWNSCALE_NUM_FILTERS,
+    DOWNSCALE_NUM_FILTERS
+  );
+  gl.uniform2f(
+    UPSCALE_input_size_loc,
+    DOWNSCALE_output_size, // 16 --  // * DOWNSCALE_NUM_FILTERS, // 64
+    DOWNSCALE_output_size // 16 --  // * DOWNSCALE_NUM_FILTERS, // 64
+  );
+  gl.uniform2f(
+    UPSCALE_output_size_loc,
+    UPSCALE_output_size,
+    UPSCALE_output_size
+  );
+
   gl.viewport(0, 0, 32, 32);
   gl.clearColor(0, 0, 1, 1);
   gl.drawArrays(gl.TRIANGLES, 0, verts.length / 2);
-  // ----------------
+  // ----------------------------------------------
 
-  // OUTPUT ---------
+  // OUTPUT ---- DRAWING TO SCREEN ----------------
   gl.bindFramebuffer(gl.FRAMEBUFFER, null);
   gl.useProgram(OUTPUT);
   gl.bindVertexArray(OUTPUT_vao);
   gl.uniform1i(OUTPUT_texLoc, 0);
   gl.activeTexture(gl.TEXTURE0 + 0);
-  //gl.bindTexture(gl.TEXTURE_2D, CONV2D_transpose_tex);
-  gl.bindTexture(gl.TEXTURE_2D, CONV2D_tex);
+  gl.bindTexture(gl.TEXTURE_2D, CONV2D_transpose_tex);
+  //gl.bindTexture(gl.TEXTURE_2D, CONV2D_tex);
 
   gl.enable(gl.SCISSOR_TEST);
-  const filter_size = 32;
+  const filter_size = 64;
   gl.viewport(0, filter_size, 512, 512 + filter_size);
   gl.scissor(0, filter_size, 512, 512 + filter_size);
   gl.clear(gl.COLOR_BUFFER_BIT);
   gl.drawArrays(gl.TRIANGLES, 0, verts.length / 2);
 
+  // DOWNSCALE Filters
   gl.bindTexture(gl.TEXTURE_2D, DOWNSCALE_filter);
   gl.viewport(0, 0, filter_size, filter_size);
   gl.scissor(0, 0, filter_size, filter_size);
   gl.clearColor(1.0, 1.0, 0.0, 1.0);
   gl.drawArrays(gl.TRIANGLES, 0, verts.length / 2);
 
+  // UPSCALE Filters
+  gl.bindTexture(gl.TEXTURE_2D, UPSCALE_filter);
+  gl.viewport(filter_size, 0, filter_size * 3, filter_size);
+  gl.scissor(filter_size, 0, filter_size * 3, filter_size);
+  gl.clearColor(1.0, 1.0, 0.0, 1.0);
+  gl.drawArrays(gl.TRIANGLES, 0, verts.length / 2);
+
+  // INPUT
+  gl.bindTexture(gl.TEXTURE_2D, DOWNSCALE_tex);
+  gl.viewport(0, 512 + filter_size * 2, 256, 256);
+  gl.scissor(0, 512 + filter_size * 2, 256, 256);
+  gl.clearColor(1.0, 1.0, 0.0, 1.0);
+  gl.drawArrays(gl.TRIANGLES, 0, verts.length / 2);
+
+  // DOWNSCALEd
+  gl.bindTexture(gl.TEXTURE_2D, CONV2D_tex);
+  gl.viewport(256, 512 + filter_size * 2, 256, 256);
+  gl.scissor(256, 512 + filter_size * 2, 256, 256);
+  gl.clearColor(1.0, 1.0, 0.0, 1.0);
+  gl.drawArrays(gl.TRIANGLES, 0, verts.length / 2);
   // ----------------
 
   gl.disable(gl.SCISSOR_TEST);
