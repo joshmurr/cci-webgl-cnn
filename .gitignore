@@ -2,3 +2,4 @@ node_modules
 package-lock.json
 *.swp
 pytorch-tests/venv
+pytorch-tests/data
