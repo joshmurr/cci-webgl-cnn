@@ -15,7 +15,7 @@ out vec4 outColor;
 vec3 get(vec2 _coord, vec2 _filter_offset, vec2 _offset){
   // Returns given pixel value * relavent filter value
   return texture(u_texture, _coord+_offset*u_output_texel_size).rgb
-  *((texture(u_filter, _filter_offset+(_offset*u_filter_texel_size)).rgb) * 2.0 - vec3(1.0));
+  *((texture(u_filter, _filter_offset+(_offset*u_filter_texel_size)).rgb));// * 2.0 - vec3(1.0));
 } 
 
 void main() {
@@ -31,7 +31,7 @@ void main() {
     sum_row += get(input_st, filter_offset, vec2(3.0, y));
   }
 
-  float sum = dot(sum_row * 0.0625, vec3(1.0)) * 0.333; // Sum vector components and average.
+  float sum = dot(sum_row * 0.125, vec3(1.0)) * 0.333; // Sum vector components and average.
   outColor = vec4(vec3(sum), 1.0);
 
 }

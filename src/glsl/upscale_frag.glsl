@@ -15,7 +15,7 @@ out vec4 outColor;
 
 float get(vec2 _st, vec2 _filter_offset, vec2 _offset){
   return texture(u_texture, _st + _offset * u_input_texel_size).r
-        *((texture(u_filter, (_filter_offset + _offset) * u_filter_texel_size).r) * 2.0 - 1.0);
+        *((texture(u_filter, (_filter_offset + _offset*2.0) * u_filter_texel_size).r));// * 2.0 - 1.0);
 } 
 
 void main(){
@@ -37,11 +37,12 @@ void main(){
         vec2 offset_filter = filter_offset + vec2(f_x, f_y);
         // DO FILTER 4x4 ROUTINE
         float sum_row = 0.0;
-        for(float y=0.0; y<4.0; y+=1.0){
+        for(float y=0.0; y<2.0; y+=0.5){
+          // Fractional Stride on input texture
           sum_row += get(offset_st, offset_filter + secondary_filter_offset, vec2(0.0, y));
+          sum_row += get(offset_st, offset_filter + secondary_filter_offset, vec2(0.5, y));
           sum_row += get(offset_st, offset_filter + secondary_filter_offset, vec2(1.0, y));
-          sum_row += get(offset_st, offset_filter + secondary_filter_offset, vec2(2.0, y));
-          sum_row += get(offset_st, offset_filter + secondary_filter_offset, vec2(3.0, y));
+          sum_row += get(offset_st, offset_filter + secondary_filter_offset, vec2(1.5, y));
         }
         sum_filters += sum_row;
       }

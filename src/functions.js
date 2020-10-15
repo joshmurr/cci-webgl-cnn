@@ -127,9 +127,9 @@ export function generateFour() {
   ]; //prettier-ignore
   let data = [];
   for (let i = 0; i < d.length; i++) {
-    data.push(d[i] === 0 ? Math.floor(Math.random() * 150) : d[i]);
-    data.push(d[i] === 0 ? Math.floor(Math.random() * 150) : d[i]);
-    data.push(d[i] === 0 ? Math.floor(Math.random() * 150) : d[i]);
+    data.push(d[i] === 0 ? Math.floor(Math.random() * 10) : d[i]);
+    data.push(d[i] === 0 ? Math.floor(Math.random() * 10) : d[i]);
+    data.push(d[i] === 0 ? Math.floor(Math.random() * 10) : d[i]);
   }
   //console.log(data);
   return new Uint8Array(data);
