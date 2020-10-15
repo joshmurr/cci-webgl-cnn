@@ -48,9 +48,6 @@ export default class Core {
     };
     if (_opts) Object.assign(opts, _opts);
 
-    console.log(this.gl);
-    console.log(opts);
-
     const texture = this.gl.createTexture();
     this.gl.activeTexture(this.gl.TEXTURE0 + opts.textureUnit);
     this.gl.bindTexture(opts.type, texture);
@@ -78,15 +75,28 @@ export default class Core {
     this.gl.texParameteri(
       this.gl.TEXTURE_2D,
       this.gl.TEXTURE_WRAP_S,
-      this.gl.CLAMP_TO_EDGE
+      this.gl.REPEAT
     );
     this.gl.texParameteri(
       this.gl.TEXTURE_2D,
       this.gl.TEXTURE_WRAP_T,
-      this.gl.CLAMP_TO_EDGE
+      this.gl.REPEAT
     );
 
     return texture;
+  }
+
+  createFramebuffer(_tex) {
+    const fb = this.gl.createFramebuffer();
+    this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, fb);
+    this.gl.framebufferTexture2D(
+      this.gl.FRAMEBUFFER,
+      this.gl.COLOR_ATTACHMENT0,
+      this.gl.TEXTURE_2D,
+      _tex,
+      0
+    );
+    return fb;
   }
 
   generateImageData(w, h, num_channels) {
