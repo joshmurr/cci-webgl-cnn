@@ -61,7 +61,7 @@ export function generateImageData(w, h, num_channels, value = null) {
       for (let c = 0; c < num_channels; c++) {
         data[i + w * num_channels * j + c] = value
           ? value
-          : Math.floor(Math.random() * 200 + 55);
+          : Math.floor(Math.random() * 255);
       }
   return data;
 }
@@ -127,9 +127,9 @@ export function generateFour() {
   ]; //prettier-ignore
   let data = [];
   for (let i = 0; i < d.length; i++) {
-    data.push(d[i] === 0 ? Math.floor(Math.random() * 60) : d[i]);
-    data.push(d[i] === 0 ? Math.floor(Math.random() * 60) : d[i]);
-    data.push(d[i] === 0 ? Math.floor(Math.random() * 60) : d[i]);
+    data.push(d[i] === 0 ? Math.floor(Math.random() * 150) : d[i]);
+    data.push(d[i] === 0 ? Math.floor(Math.random() * 150) : d[i]);
+    data.push(d[i] === 0 ? Math.floor(Math.random() * 150) : d[i]);
   }
   //console.log(data);
   return new Uint8Array(data);

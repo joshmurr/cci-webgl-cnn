@@ -183,7 +183,7 @@ gl.texImage2D(
     4 * DOWNSCALE_NUM_FILTERS * UPSCALE_NUM_FILTERS,
     4 * DOWNSCALE_NUM_FILTERS,
     1,
-    0
+    255
   )
 );
 gl.generateMipmap(gl.TEXTURE_2D);
