@@ -52,16 +52,16 @@ const DOWNSCALE2_output_size = 8;
 const UPSCALE_output_size = 16;
 const UPSCALE2_output_size = 32;
 
-const __DOWNSCALE = new Conv2D(gl, {G
+const __DOWNSCALE = new Conv2D(gl, {
   input: {
     size: 32,
-    num_channels: 3,[MaG
+    num_channels: 3,
   },
   output: {
-    size: 16,[MaG
+    size: 16,
     num_channels: 1,
   },
-  filters: {[MaG
+  filters: {
     num_channels: 3,
     num: 2,
   },
