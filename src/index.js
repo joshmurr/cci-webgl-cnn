@@ -12,6 +12,7 @@ import {
   sidesFilter,
   topBottomFilter,
 } from './functions.js';
+import Conv2D from './conv2d_class.js';
 import './styles.css';
 
 const downscale = {
@@ -51,16 +52,27 @@ const DOWNSCALE2_output_size = 8;
 const UPSCALE_output_size = 16;
 const UPSCALE2_output_size = 32;
 
+const __DOWNSCALE = new Conv2D(gl, {G
+  input: {
+    size: 32,
+    num_channels: 3,[MaG
+  },
+  output: {
+    size: 16,[MaG
+    num_channels: 1,
+  },
+  filters: {[MaG
+    num_channels: 3,
+    num: 2,
+  },
+  program: {
+    vs: downscale.vs,
+    fs: downscale.fs,
+  },
+});
+
 // DOWNSCALE PROGRAM ----------------------------------------------------------
 const DOWNSCALE = createProgram(gl, downscale.vs, downscale.fs);
-const DOWNSCALE_vao = gl.createVertexArray();
-gl.bindVertexArray(DOWNSCALE_vao);
-const DOWNSCALE_posAttrLoc = gl.getAttribLocation(DOWNSCALE, 'a_position');
-const DOWNSCALE_positionBuffer = gl.createBuffer();
-gl.bindBuffer(gl.ARRAY_BUFFER, DOWNSCALE_positionBuffer);
-gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(verts), gl.STATIC_DRAW);
-gl.enableVertexAttribArray(DOWNSCALE_posAttrLoc);
-gl.vertexAttribPointer(DOWNSCALE_posAttrLoc, 2, gl.FLOAT, false, 0, 0);
 
 // DOWNSCALE TEXTURE: 32x32x3
 const DOWNSCALE_texLoc = gl.getUniformLocation(DOWNSCALE, 'u_texture');
@@ -132,14 +144,6 @@ const DOWNSCALE_num_filters_loc = gl.getUniformLocation(
 
 // DOWNSCALE2 *** 2 *** PROGRAM ------------------------------------------------
 const DOWNSCALE2 = createProgram(gl, downscale2.vs, downscale2.fs);
-const DOWNSCALE2_vao = gl.createVertexArray();
-gl.bindVertexArray(DOWNSCALE2_vao);
-const DOWNSCALE2_posAttrLoc = gl.getAttribLocation(DOWNSCALE2, 'a_position');
-const DOWNSCALE2_positionBuffer = gl.createBuffer();
-gl.bindBuffer(gl.ARRAY_BUFFER, DOWNSCALE2_positionBuffer);
-gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(verts), gl.STATIC_DRAW);
-gl.enableVertexAttribArray(DOWNSCALE2_posAttrLoc);
-gl.vertexAttribPointer(DOWNSCALE2_posAttrLoc, 2, gl.FLOAT, false, 0, 0);
 
 // DOWNSCALE2 TEXTURE: 8x8x1 (single)
 const DOWNSCALE2_texLoc = gl.getUniformLocation(DOWNSCALE2, 'u_texture');
@@ -218,14 +222,6 @@ const DOWNSCALE2_num_filters_loc = gl.getUniformLocation(
 
 // UPSCALE PROGRAM --------------------------------------------------------
 const UPSCALE = createProgram(gl, upscale.vs, upscale.fs);
-const UPSCALE_vao = gl.createVertexArray();
-gl.bindVertexArray(UPSCALE_vao);
-const UPSCALE_posAttrLoc = gl.getAttribLocation(UPSCALE, 'a_position');
-const UPSCALE_positionBuffer = gl.createBuffer();
-gl.bindBuffer(gl.ARRAY_BUFFER, UPSCALE_positionBuffer);
-gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(verts), gl.STATIC_DRAW);
-gl.enableVertexAttribArray(UPSCALE_posAttrLoc);
-gl.vertexAttribPointer(UPSCALE_posAttrLoc, 2, gl.FLOAT, false, 0, 0);
 
 // UPSCALE TEXTURE: 16x16x1
 const UPSCALE_texLoc = gl.getUniformLocation(UPSCALE, 'u_texture');
@@ -297,14 +293,6 @@ const UPSCALE_output_size_loc = gl.getUniformLocation(UPSCALE, 'u_output_size');
 
 // UPSCALE *** 2 *** PROGRAM ----------------------------------------------
 const UPSCALE2 = createProgram(gl, upscale2.vs, upscale2.fs);
-const UPSCALE2_vao = gl.createVertexArray();
-gl.bindVertexArray(UPSCALE2_vao);
-const UPSCALE2_posAttrLoc = gl.getAttribLocation(UPSCALE2, 'a_position');
-const UPSCALE2_positionBuffer = gl.createBuffer();
-gl.bindBuffer(gl.ARRAY_BUFFER, UPSCALE2_positionBuffer);
-gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(verts), gl.STATIC_DRAW);
-gl.enableVertexAttribArray(UPSCALE2_posAttrLoc);
-gl.vertexAttribPointer(UPSCALE2_posAttrLoc, 2, gl.FLOAT, false, 0, 0);
 
 // UPSCALE2 TEXTURE: 16x16x1
 const UPSCALE2_texLoc = gl.getUniformLocation(UPSCALE2, 'u_texture');
@@ -385,6 +373,7 @@ const UPSCALE2_output_size_loc = gl.getUniformLocation(
 
 // OUTPUT PROGRAM --------------------------------------------------------
 const OUTPUT = createProgram(gl, output.vs, output.fs);
+// A generaic VAO with position and texcoord buffers used for drawing to screen
 const OUTPUT_vao = gl.createVertexArray();
 gl.bindVertexArray(OUTPUT_vao);
 const OUTPUT_posAttrLoc = gl.getAttribLocation(OUTPUT, 'a_position');
@@ -550,7 +539,8 @@ function draw(gl, process = true) {
   // DOWNSCALE ----------------------------------------
   // Outputs to CONV2D_tex (16*DOWNSCALE_NUM_FILTERS x 16*DOWNSCALE_NUM_FILTERS x 1)
   gl.useProgram(DOWNSCALE);
-  gl.bindVertexArray(DOWNSCALE_vao);
+  //gl.bindVertexArray(DOWNSCALE_vao);
+  gl.bindVertexArray(OUTPUT_vao);
   gl.bindFramebuffer(gl.FRAMEBUFFER, DOWNSCALE_framebuffer);
 
   gl.uniform1i(DOWNSCALE_texLoc, 0);
@@ -586,13 +576,17 @@ function draw(gl, process = true) {
   gl.uniform1f(DOWNSCALE_num_filters_loc, DOWNSCALE_NUM_FILTERS);
 
   gl.clearColor(0, 0, 1, 1);
-  gl.drawArrays(gl.TRIANGLES, 0, verts.length / 2);
+  //gl.drawArrays(gl.TRIANGLES, 0, verts.length / 2);
+  // ----------------------------------------------
+  // ----------------------------------------------
+  __DOWNSCALE.forward(DOWNSCALE_framebuffer);
+  // ----------------------------------------------
   // ----------------------------------------------
 
   // DOWNSCALE *** 2 *** ------------------------------
   // Outputs to CONV2D_2_tex (8*DOWNSCALE2_NUM_FILTERS x 8*DOWNSCALE2_NUM_FILTERS x 1)
   gl.useProgram(DOWNSCALE2);
-  gl.bindVertexArray(DOWNSCALE2_vao);
+  //gl.bindVertexArray(DOWNSCALE2_vao);
   gl.bindFramebuffer(gl.FRAMEBUFFER, DOWNSCALE2_framebuffer);
 
   gl.uniform1i(DOWNSCALE2_texLoc, 0);
@@ -639,7 +633,7 @@ function draw(gl, process = true) {
   // UPSCALE --------------------------------------
   // Outputs to CONV2D_transpose_tex
   gl.useProgram(UPSCALE);
-  gl.bindVertexArray(UPSCALE_vao);
+  //gl.bindVertexArray(UPSCALE_vao);
   gl.bindFramebuffer(gl.FRAMEBUFFER, UPSCALE_framebuffer);
 
   gl.uniform1i(UPSCALE_texLoc, 0);
@@ -690,7 +684,7 @@ function draw(gl, process = true) {
   // UPSCALE *** 2 *** ----------------------------
   // Outputs to CONV2D_2_transpose_tex (32x32x3)
   gl.useProgram(UPSCALE2);
-  gl.bindVertexArray(UPSCALE2_vao);
+  //gl.bindVertexArray(UPSCALE2_vao);
   gl.bindFramebuffer(gl.FRAMEBUFFER, UPSCALE2_framebuffer);
 
   gl.uniform1i(UPSCALE2_texLoc, 0);
@@ -736,7 +730,7 @@ function draw(gl, process = true) {
   // OUTPUT ---- DRAWING TO SCREEN ----------------
   gl.bindFramebuffer(gl.FRAMEBUFFER, null);
   gl.useProgram(OUTPUT);
-  gl.bindVertexArray(OUTPUT_vao);
+  //gl.bindVertexArray(OUTPUT_vao);
   gl.uniform1i(OUTPUT_texLoc, 0);
   gl.activeTexture(gl.TEXTURE0 + 0);
   gl.bindTexture(gl.TEXTURE_2D, CONV2D_2_transpose_tex);
