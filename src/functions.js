@@ -127,9 +127,9 @@ export function generateFour() {
   ]; //prettier-ignore
   let data = [];
   for (let i = 0; i < d.length; i++) {
-    data.push(d[i] === 0 ? Math.floor(Math.random() * 200) : d[i]);
-    data.push(d[i] === 0 ? Math.floor(Math.random() * 200) : d[i]);
-    data.push(d[i] === 0 ? Math.floor(Math.random() * 200) : d[i]);
+    data.push(d[i] === 0 ? Math.floor(Math.random() * 10) : d[i]);
+    data.push(d[i] === 0 ? Math.floor(Math.random() * 10) : d[i]);
+    data.push(d[i] === 0 ? Math.floor(Math.random() * 10) : d[i]);
   }
   //console.log(data);
   return new Uint8Array(data);
@@ -171,13 +171,25 @@ export function diagFilterOpp() {
 }
 export function sidesFilter(num) {
   let f = [
-      255, 0, 128, 255,
-      255, 0, 128, 255,
-      255, 0, 128, 255,
-      255, 0, 128, 255,
+      255, 0, 0, 255,
+      255, 0, 0, 255,
+      255, 0, 0, 255,
+      255, 0, 0, 255,
+      255, 0, 0, 255,
+      255, 0, 0, 255,
+      255, 0, 0, 255,
+      255, 0, 0, 255,
+      255, 0, 0, 255,
+      255, 0, 0, 255,
+      255, 0, 0, 255,
+      255, 0, 0, 255,
+      255, 0, 0, 255,
+      255, 0, 0, 255,
+      255, 0, 0, 255,
+      255, 0, 0, 255,
   ]; //prettier-ignore
   let filter = [];
-  for (let n = 0; n < num * num; n++)
+  for (let n = 0; n < num; n++)
     for (let i = 0; i < f.length; i++) {
       filter.push(f[i]);
       filter.push(f[i]);
@@ -186,14 +198,32 @@ export function sidesFilter(num) {
   return new Uint8Array(filter);
 }
 
-export function topBottomFilter() {
-  // Red Filter
-  let filter = [
-    98, 98, 98,128, 128, 128,128, 128, 128,98, 98, 98,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-    200, 200, 200,255, 255, 255,255, 255, 255,200, 200, 200,
-
+export function topBottomFilter(num) {
+  let f = [
+      255, 255, 255, 255,
+      255, 255, 255, 255,
+      255, 255, 255, 255,
+      255, 255, 255, 255,
+      0, 0, 0, 0,
+      0, 0, 0, 0,
+      0, 0, 0, 0,
+      0, 0, 0, 0,
+      0, 0, 0, 0,
+      0, 0, 0, 0,
+      0, 0, 0, 0,
+      0, 0, 0, 0,
+      255, 255, 255, 255,
+      255, 255, 255, 255,
+      255, 255, 255, 255,
+      255, 255, 255, 255,
   ]; //prettier-ignore
+  let filter = [];
+
+  for (let n = 0; n < num; n++)
+    for (let i = 0; i < f.length; i++) {
+      filter.push(f[i]);
+      filter.push(f[i]);
+      filter.push(f[i]);
+    }
   return new Uint8Array(filter);
 }

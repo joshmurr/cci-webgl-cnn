@@ -1,7 +1,6 @@
 node_modules
 package-lock.json
 *.swp
-.ipynb_checkpoints*
-pytorch-tests/data
 pytorch-tests/venv
+pytorch-tests/data
 pytorch-tests/.ipynb_checkpoints
