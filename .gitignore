@@ -1,3 +1,4 @@
 node_modules
 package-lock.json
 *.swp
+.ipynb_checkpoints*
