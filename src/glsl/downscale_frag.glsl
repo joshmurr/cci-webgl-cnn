@@ -24,11 +24,11 @@ void main() {
   vec2 filter_offset = floor(st) / u_num_filters;
 
   vec3 sum_row = vec3(0.0);
-  for(float y=0.0; y<4.0; y+=1.0){
-    sum_row += get(input_st, filter_offset, vec2(0.0, y));
-    sum_row += get(input_st, filter_offset, vec2(1.0, y));
-    sum_row += get(input_st, filter_offset, vec2(2.0, y));
-    sum_row += get(input_st, filter_offset, vec2(3.0, y));
+  for(float y=-1.5; y<2.0; y+=1.0){
+    sum_row += get(input_st, filter_offset, vec2(-1.5, y));
+    sum_row += get(input_st, filter_offset, vec2(-0.5, y));
+    sum_row += get(input_st, filter_offset, vec2(0.5, y));
+    sum_row += get(input_st, filter_offset, vec2(1.5, y));
   }
 
   float sum = dot(sum_row * 0.125, vec3(1.0)) * 0.333; // Sum vector components and average.

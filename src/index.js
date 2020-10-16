@@ -546,6 +546,7 @@ gl.bindVertexArray(null);
 gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
 function draw(gl, process = true) {
+  const start = performance.now();
   // DOWNSCALE ----------------------------------------
   // Outputs to CONV2D_tex (16*DOWNSCALE_NUM_FILTERS x 16*DOWNSCALE_NUM_FILTERS x 1)
   gl.useProgram(DOWNSCALE);
@@ -818,6 +819,7 @@ function draw(gl, process = true) {
   gl.disable(gl.SCISSOR_TEST);
   gl.bindVertexArray(null);
   gl.bindBuffer(gl.ARRAY_BUFFER, null);
+  console.log(performance.now() - start);
 }
 
 function resize(gl) {

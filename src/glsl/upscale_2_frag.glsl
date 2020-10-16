@@ -39,12 +39,12 @@ void main(){
         vec2 offset_filter = filter_offset + conv;
 
         float sum_row = 0.0;
-        for(float y=0.0; y<2.0; y+=0.5){
+        for(float y=-0.75; y<1.0; y+=0.5){
           // Fractional Stride on input texture
-          sum_row += get(offset_st, offset_filter + secondary_filter_offset, vec2(0.0, y));
-          sum_row += get(offset_st, offset_filter + secondary_filter_offset, vec2(0.5, y));
-          sum_row += get(offset_st, offset_filter + secondary_filter_offset, vec2(1.0, y));
-          sum_row += get(offset_st, offset_filter + secondary_filter_offset, vec2(1.5, y));
+          sum_row += get(offset_st, offset_filter + secondary_filter_offset, vec2(-0.75, y));
+          sum_row += get(offset_st, offset_filter + secondary_filter_offset, vec2(-0.25, y));
+          sum_row += get(offset_st, offset_filter + secondary_filter_offset, vec2(0.25, y));
+          sum_row += get(offset_st, offset_filter + secondary_filter_offset, vec2(0.75, y));
         }
         sum_filters += sum_row;
       }

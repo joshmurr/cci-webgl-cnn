@@ -36,16 +36,16 @@ void main() {
       vec2 offset_st = input_st + conv;
       vec2 offset_filter = filter_offset + conv;
 
-      for(float y=0.0; y<4.0; y+=1.0){
-        sum_row += get(input_st, offset_filter, vec2(0.0, y));
-        sum_row += get(input_st, offset_filter, vec2(1.0, y));
-        sum_row += get(input_st, offset_filter, vec2(2.0, y));
-        sum_row += get(input_st, offset_filter, vec2(3.0, y));
+      for(float y=-1.5; y<2.0; y+=1.0){
+        sum_row += get(input_st, offset_filter, vec2(-1.5, y));
+        sum_row += get(input_st, offset_filter, vec2(-0.5, y));
+        sum_row += get(input_st, offset_filter, vec2(0.5, y));
+        sum_row += get(input_st, offset_filter, vec2(1.5, y));
       }
     }
   }
 
-  float sum = dot(sum_row * (1.0/pow(2.0, u_num_filters_prev.x*3.0)), vec3(1.0)); // Sum vector components and average.
+  float sum = dot(sum_row * (1.0/pow(2.0, u_num_filters_prev.x*2.0)), vec3(1.0)); // Sum vector components and average.
 
   outColor = vec4(sum, 0.0, 0.0, 1.0);
 

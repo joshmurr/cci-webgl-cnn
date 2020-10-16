@@ -4,7 +4,6 @@ import torch.nn as nn
 from torch.autograd import Variable
 from torchvision import transforms
 from torchvision.utils import save_image
-from matplotlib import pyplot as plt
 # from time import time
 # import datetime
 
@@ -47,16 +46,10 @@ class Model(nn.Module):
 model = Model()
 img = torch.rand(1, 3, 32, 32)
 pic = to_img(img.data)
-# save_image(pic, './simple_imgs/input.png')
+save_image(pic, './simple_imgs/input.png')
 # img = Variable(img)
 
 output = model(img)
 
 pic = to_img(output.data)
 save_image(pic, './simple_imgs/output.png')
-
-weights = model.encoder[0].weight.data.cpu().numpy()
-
-plt.imshow(weights[2, ...])
-
-

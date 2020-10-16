@@ -6,7 +6,6 @@ from torch.utils.data import DataLoader
 from torchvision import transforms
 from torchvision.utils import save_image
 from torchvision.datasets import MNIST
-from matplotlib import pyplot as plt
 import os
 
 if not os.path.exists('./dc_img'):
@@ -82,18 +81,3 @@ for epoch in range(num_epochs):
         save_image(pic, './dc_img/image_{}.png'.format(epoch))
 
 torch.save(model.state_dict(), './conv_autoencoder.pth')
-
-print(model.encoder)
-print(model.decoder)
-
-# +
-encoder_layer_0_weights = model.encoder[0].weight.data.cpu().numpy()
-
-plt.imshow(encoder_layer_0_weights[15, ...])
-# -
-
-print(encoder_layer_0_weights.shape)
-
-print(encoder_layer_0_weights)
-
-
