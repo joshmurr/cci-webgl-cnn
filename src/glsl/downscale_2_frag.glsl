@@ -44,7 +44,7 @@ void main() {
     }
   }
 
-  float scale = pow(u_num_filters.x * u_num_filters.y, 2.0);
+  float scale = pow(u_num_filters.x * u_num_filters.y, 1.0);
   float sum = dot(sum_row / scale, vec3(1.0)); // Sum vector components and average.
 
   outColor = vec4(sum, 0.0, 0.0, 1.0);

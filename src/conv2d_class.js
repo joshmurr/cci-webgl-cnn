@@ -8,13 +8,13 @@ export default class Conv2D extends Core {
 
     this.opts = {
       input: {
-        size: 32,
+        size: 1,
         num_channels: 1,
         data: null,
         texture: null,
       },
       output: {
-        size: 32,
+        size: 1,
         num_channels: 1,
       },
       filter: {
@@ -22,8 +22,10 @@ export default class Conv2D extends Core {
         num_channels: 1,
         num: 0,
         data: null,
+        upscale: false,
+        texel_size: null,
       },
-      prev_layer: {
+      prev: {
         num_filters: 1,
       },
     };
@@ -52,6 +54,7 @@ export default class Conv2D extends Core {
         'u_num_filters_prev'
       ),
     };
+    // Copy options passed to object
     for (const prop in this.opts) {
       Object.assign(this.opts[prop], _opts[prop]);
     }
@@ -66,8 +69,8 @@ export default class Conv2D extends Core {
       this.opts.input.num_channels
     );
     this.input_tex = this.createTexture({
-      width: this.opts.input.size * this.opts.prev_layer.num_filters,
-      height: this.opts.input.size * this.opts.prev_layer.num_filters,
+      width: this.opts.input.size * this.opts.prev.num_filters,
+      height: this.opts.input.size * this.opts.prev.num_filters,
       data: this.opts.input.data,
       internalFormat: internalFormat,
       format: format,
@@ -77,14 +80,19 @@ export default class Conv2D extends Core {
     [internalFormat, format] = this.getTextureFormat(
       this.opts.filter.num_channels
     );
+    this.opts.filter.texel_size = this.opts.filter.upscale
+      ? this.opts.filter.size *
+        this.opts.filter.num *
+        this.opts.prev.num_filters
+      : this.opts.filter.size * this.opts.filter.num;
     this.filters_tex = this.createTexture({
-      width: this.opts.filter.size * this.opts.filter.num,
-      height: this.opts.filter.size * this.opts.filter.num,
+      width: this.opts.filter.texel_size,
+      height: this.opts.filter.texel_size,
       data: this.opts.filter.data
         ? this.opts.filter.data
         : this.generateImageData(
-            this.opts.filter.size * this.opts.filter.num,
-            this.opts.filter.size * this.opts.filter.num,
+            this.opts.filter.texel_size,
+            this.opts.filter.texel_size,
             this.opts.filter.num_channels
           ),
       internalFormat: internalFormat,
@@ -112,10 +120,14 @@ export default class Conv2D extends Core {
     return this.output_tex;
   }
 
-  forward(_fb) {
+  get filter() {
+    return this.filters_tex;
+  }
+
+  forward() {
     this.gl.useProgram(this.program);
 
-    this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, _fb ? _fb : this.output_fb);
+    this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.output_fb);
 
     this.gl.uniform1i(this.uniforms.input_tex, 0);
     this.gl.uniform1i(this.uniforms.filters_tex, 1);
@@ -135,13 +147,13 @@ export default class Conv2D extends Core {
 
     this.gl.uniform2f(
       this.uniforms.filter_texel_size,
-      1 / (this.opts.filter.num * this.opts.filter.size),
-      1 / (this.opts.filter.num * this.opts.filter.size)
+      1 / this.opts.filter.texel_size,
+      1 / this.opts.filter.texel_size
     );
     this.gl.uniform2f(
       this.uniforms.input_texel_size,
-      1 / (this.opts.input.size * this.opts.prev_layer.num_filters),
-      1 / (this.opts.input.size * this.opts.prev_layer.num_filters)
+      1 / (this.opts.input.size * this.opts.prev.num_filters),
+      1 / (this.opts.input.size * this.opts.prev.num_filters)
     );
     this.gl.uniform2f(
       this.uniforms.output_texel_size,
@@ -160,8 +172,8 @@ export default class Conv2D extends Core {
     );
     this.gl.uniform2f(
       this.uniforms.num_filters_prev,
-      this.opts.prev_layer.num_filters,
-      this.opts.prev_layer.num_filters
+      this.opts.prev.num_filters,
+      this.opts.prev.num_filters
     );
     this.gl.uniform2f(
       this.uniforms.num_filters,
@@ -170,5 +182,6 @@ export default class Conv2D extends Core {
     );
 
     this.gl.drawArrays(this.gl.TRIANGLES, 0, this.verts.length / 2);
+    this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
   }
 }
