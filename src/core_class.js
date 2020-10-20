@@ -102,8 +102,25 @@ export default class Core {
   generateImageData(w, h, num_channels) {
     let len = w * h * num_channels;
     let data = [];
-    for (let i = 0; i < len; i++) data.push(Math.floor(Math.random() * 255));
+    const range = this.getFilterRange();
+    for (let i = 0; i < len; i++) {
+      let val = Math.random() * (range.max - range.min);
+      data.push(Math.floor(val + range.min));
+    }
     return new Uint8Array(data);
+  }
+
+  getFilterRange(_r) {
+    switch (_r) {
+      case 'down':
+        return { min: 0, max: 10 };
+      case 'up':
+        return { min: 2, max: 10 };
+      case 'output':
+        return { min: 4, max: 10 };
+      default:
+        return { min: 0, max: 255 };
+    }
   }
 
   getTextureFormat(num_channels) {

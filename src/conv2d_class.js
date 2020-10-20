@@ -132,12 +132,11 @@ export default class Conv2D extends Core {
           this.opts.prev.num_filters;
         return { w: w, h: h };
       case 'output':
-        w =
-          this.opts.filter.size *
-          this.opts.filter.num *
-          this.opts.prev.num_filters;
-        h = this.opts.filter.size * this.opts.prev.num_filters;
+        w = h = this.opts.filter.size * this.opts.prev.num_filters;
         return { w: w, h: h };
+      //this.opts.filter.size *
+      //this.opts.filter.num *
+      //this.opts.prev.num_filters;
       default:
         throw "Type must be 'down', 'up' or 'output'.";
     }
@@ -209,7 +208,8 @@ export default class Conv2D extends Core {
     this.gl.uniform2f(
       this.uniforms.num_filters,
       this.opts.filter.num,
-      this.opts.filter.type !== 'output' ? this.opts.filter.num : 1
+      this.opts.filter.num
+      //this.opts.filter.type !== 'output' ? this.opts.filter.num : 1
     );
 
     this.gl.drawArrays(this.gl.TRIANGLES, 0, this.verts.length / 2);

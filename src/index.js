@@ -1,4 +1,9 @@
-import { createProgram, createTexture, generateFour } from './functions.js';
+import {
+  createProgram,
+  createTexture,
+  generateFour,
+  generateImageData,
+} from './functions.js';
 import Conv2D from './conv2d_class.js';
 import './styles.css';
 
@@ -25,6 +30,7 @@ const __DOWNSCALE = new Conv2D(
       num_channels: 3,
       data: generateFour(),
       //data: generateImageData(32, 32, 3),
+      //texture: __DOWNSCALE_a.output,
     },
     output: {
       size: 16,
@@ -68,6 +74,59 @@ const __DOWNSCALE_2 = new Conv2D(
   }
 );
 
+//const __DOWNSCALE_3 = new Conv2D(
+//gl,
+//{
+//input: {
+//size: 8,
+//num_channels: 1,
+//texture: __DOWNSCALE_2.output,
+//},
+//output: {
+//size: 4,
+//num_channels: 1,
+//},
+//filter: {
+//num_channels: 1,
+//num: 8,
+//type: 'down',
+//},
+//prev: {
+//num_filters: __DOWNSCALE_2.opts.filter.num,
+//},
+//},
+//{
+//vs: BASIC_VERT,
+//fs: require('./glsl/downscale_2_frag.glsl'),
+//}
+//);
+//const __UPSCALE_a = new Conv2D(
+//gl,
+//{
+//input: {
+//size: 4,
+//num_channels: 1,
+//texture: __DOWNSCALE_3.output,
+//},
+//output: {
+//size: 8,
+//num_channels: 1,
+//},
+//filter: {
+//num_channels: 1,
+//num: 4,
+//type: 'up',
+//},
+//prev: {
+//num_filters: __DOWNSCALE_3.opts.filter.num,
+//},
+//},
+//{
+//vs: BASIC_VERT,
+//fs: require('./glsl/upscale_frag.glsl'),
+//}
+//);
+
 const __UPSCALE = new Conv2D(
   gl,
   {
@@ -107,8 +166,8 @@ const __UPSCALE_2 = new Conv2D(
       num_channels: 3,
     },
     filter: {
-      num_channels: 1,
-      num: 3,
+      num_channels: 3,
+      num: 1,
       type: 'output',
     },
     prev: {
@@ -180,6 +239,8 @@ function draw(gl, process = true) {
   // COMPUTATIONAL GRAPH --------------------------
   __DOWNSCALE.forward();
   __DOWNSCALE_2.forward();
+  //__DOWNSCALE_3.forward();
+  //__UPSCALE_a.forward();
   __UPSCALE.forward();
   __UPSCALE_2.forward();
   // ----------------------------------------------
@@ -202,68 +263,48 @@ function draw(gl, process = true) {
   gl.bindTexture(gl.TEXTURE_2D, __DOWNSCALE.filter);
   gl.viewport(0, 0, filter_size, filter_size);
   gl.scissor(0, 0, filter_size, filter_size);
-  gl.clearColor(1.0, 1.0, 0.0, 1.0);
   gl.drawArrays(gl.TRIANGLES, 0, verts.length / 2);
 
   // DOWNSCALE *** 2 *** Filters
   gl.bindTexture(gl.TEXTURE_2D, __DOWNSCALE_2.filter);
   gl.viewport(filter_size, 0, filter_size, filter_size);
   gl.scissor(filter_size, 0, filter_size, filter_size);
-  gl.clearColor(1.0, 1.0, 0.0, 1.0);
   gl.drawArrays(gl.TRIANGLES, 0, verts.length / 2);
 
   // UPSCALE Filters
   gl.bindTexture(gl.TEXTURE_2D, __UPSCALE.filter);
   gl.viewport(filter_size * 2, 0, filter_size, filter_size);
   gl.scissor(filter_size * 2, 0, filter_size, filter_size);
-  gl.clearColor(1.0, 1.0, 0.0, 1.0);
   gl.drawArrays(gl.TRIANGLES, 0, verts.length / 2);
 
   // UPSCALE *** 2 *** Filters
   gl.bindTexture(gl.TEXTURE_2D, __UPSCALE_2.filter);
-  gl.viewport(
-    filter_size + filter_size * __UPSCALE_2.opts.filter.num,
-    0,
-    filter_size * __UPSCALE_2.opts.filter.num,
-    filter_size
-  );
-  gl.scissor(
-    filter_size + filter_size * __UPSCALE_2.opts.filter.num,
-    0,
-    filter_size * __UPSCALE_2.opts.filter.num,
-    filter_size
-  );
-  gl.clearColor(1.0, 1.0, 0.0, 1.0);
+  gl.viewport(filter_size * 3, 0, filter_size, filter_size);
+  gl.scissor(filter_size * 3, 0, filter_size, filter_size);
   gl.drawArrays(gl.TRIANGLES, 0, verts.length / 2);
 
   // INPUT
   gl.bindTexture(gl.TEXTURE_2D, __DOWNSCALE.input);
-  //gl.bindTexture(gl.TEXTURE_2D, DOWNSCALE_tex);
   gl.viewport(0, 512 + filter_size * 2, 256, 256);
   gl.scissor(0, 512 + filter_size * 2, 256, 256);
-  gl.clearColor(1.0, 1.0, 0.0, 1.0);
   gl.drawArrays(gl.TRIANGLES, 0, verts.length / 2);
 
   // DOWNSCALEd
   gl.bindTexture(gl.TEXTURE_2D, __DOWNSCALE.output);
-  //gl.bindTexture(gl.TEXTURE_2D, CONV2D_tex);
   gl.viewport(256, 512 + filter_size * 2, 256, 256);
   gl.scissor(256, 512 + filter_size * 2, 256, 256);
-  gl.clearColor(1.0, 1.0, 0.0, 1.0);
   gl.drawArrays(gl.TRIANGLES, 0, verts.length / 2);
 
   // DOWNSCALEd *** 2 ***
   gl.bindTexture(gl.TEXTURE_2D, __DOWNSCALE_2.output);
   gl.viewport(512, 512 + filter_size * 2, 256, 256);
   gl.scissor(512, 512 + filter_size * 2, 256, 256);
-  gl.clearColor(1.0, 1.0, 0.0, 1.0);
   gl.drawArrays(gl.TRIANGLES, 0, verts.length / 2);
 
   // UPSCALEd
   gl.bindTexture(gl.TEXTURE_2D, __UPSCALE.output);
   gl.viewport(512 + 256, 512 + filter_size * 2, 256, 256);
   gl.scissor(512 + 256, 512 + filter_size * 2, 256, 256);
-  gl.clearColor(1.0, 1.0, 0.0, 1.0);
   gl.drawArrays(gl.TRIANGLES, 0, verts.length / 2);
   // ----------------
 

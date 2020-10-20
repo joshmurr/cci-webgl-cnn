@@ -42,11 +42,12 @@ void main(){
         sum_row += get(offset_st, offset_filter, vec2(0.25, y));
         sum_row += get(offset_st, offset_filter, vec2(0.75, y));
       }
-      sum_filters += sum_row;
+      sum_filters += sum_row / 16.0;
     }
   }
 
-  float scale = pow(u_num_filters.x * u_num_filters.y, 4.0);
+  //float scale = pow(u_num_filters_prev.x, u_num_filters.y);
+  float scale = pow(2.0, u_num_filters_prev.y);
   float sum = sum_filters / scale;
 
   outColor = vec4(sum, 0.0, 0.0, 1.0);
