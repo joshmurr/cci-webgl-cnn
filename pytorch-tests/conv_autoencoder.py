@@ -20,7 +20,7 @@ def to_img(x):
     return x
 
 
-num_epochs = 20
+num_epochs = 1
 batch_size = 64
 learning_rate = 1e-3
 
@@ -57,7 +57,7 @@ class autoencoder(nn.Module):
         return x
 
 
-model = autoencoder().cuda()
+model = autoencoder()
 criterion = nn.MSELoss()
 optimizer = torch.optim.Adam(model.parameters(),
                              lr=learning_rate,
@@ -66,7 +66,13 @@ optimizer = torch.optim.Adam(model.parameters(),
 for epoch in range(num_epochs):
     for data in dataloader:
         img, _ = data
-        img = Variable(img).cuda()
+        print('Data')
+        print(data)
+        print('Img')
+        print(img)
+        img = Variable(img)
+        print('Data')
+        print(img)
         # ===================forward=====================
         output = model(img)
         loss = criterion(output, img)
@@ -86,11 +92,9 @@ torch.save(model.state_dict(), './conv_autoencoder.pth')
 print(model.encoder)
 print(model.decoder)
 
-# +
 encoder_layer_0_weights = model.encoder[0].weight.data.cpu().numpy()
-
-plt.imshow(encoder_layer_0_weights[15, ...])
-# -
+print((encoder_layer_0_weights[1] + 1) * 128)
+plt.imshow(encoder_layer_0_weights[1])
 
 print(encoder_layer_0_weights.shape)
 

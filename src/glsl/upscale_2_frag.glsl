@@ -41,7 +41,7 @@ void main(){
         sum_row += get(offset_st, offset_filter, vec2(0.25, y));
         sum_row += get(offset_st, offset_filter, vec2(0.75, y));
       }
-      sum_filters += sum_row / 16.0;
+      sum_filters += sum_row / pow(2.0, u_num_filters_prev.x);
     }
   }
   outColor = vec4(sum_filters, 1.0);

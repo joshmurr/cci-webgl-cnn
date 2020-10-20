@@ -38,7 +38,7 @@ const __DOWNSCALE = new Conv2D(
     },
     filter: {
       num_channels: 3,
-      num: 2,
+      num: 4,
       type: 'down',
     },
   },
@@ -51,7 +51,7 @@ const __DOWNSCALE_2 = new Conv2D(
   gl,
   {
     input: {
-      size: 16,
+      size: __DOWNSCALE.opts.output.size,
       num_channels: 1,
       texture: __DOWNSCALE.output,
     },
@@ -61,7 +61,7 @@ const __DOWNSCALE_2 = new Conv2D(
     },
     filter: {
       num_channels: 1,
-      num: 4,
+      num: 8,
       type: 'down',
     },
     prev: {
@@ -73,59 +73,6 @@ const __DOWNSCALE_2 = new Conv2D(
     fs: require('./glsl/downscale_2_frag.glsl'),
   }
 );
-
-//const __DOWNSCALE_3 = new Conv2D(
-//gl,
-//{
-//input: {
-//size: 8,
-//num_channels: 1,
-//texture: __DOWNSCALE_2.output,
-//},
-//output: {
-//size: 4,
-//num_channels: 1,
-//},
-//filter: {
-//num_channels: 1,
-//num: 8,
-//type: 'down',
-//},
-//prev: {
-//num_filters: __DOWNSCALE_2.opts.filter.num,
-//},
-//},
-//{
-//vs: BASIC_VERT,
-//fs: require('./glsl/downscale_2_frag.glsl'),
-//}
-//);
-//const __UPSCALE_a = new Conv2D(
-//gl,
-//{
-//input: {
-//size: 4,
-//num_channels: 1,
-//texture: __DOWNSCALE_3.output,
-//},
-//output: {
-//size: 8,
-//num_channels: 1,
-//},
-//filter: {
-//num_channels: 1,
-//num: 4,
-//type: 'up',
-//},
-//prev: {
-//num_filters: __DOWNSCALE_3.opts.filter.num,
-//},
-//},
-//{
-//vs: BASIC_VERT,
-//fs: require('./glsl/upscale_frag.glsl'),
-//}
-//);
 
 const __UPSCALE = new Conv2D(
   gl,
@@ -141,7 +88,7 @@ const __UPSCALE = new Conv2D(
     },
     filter: {
       num_channels: 1,
-      num: 2,
+      num: 4,
       type: 'up',
     },
     prev: {
