@@ -68,6 +68,7 @@ const __DOWNSCALE = new Conv2D(
     filter: {
       num_channels: 3,
       num: 2,
+      type: 'down',
     },
   },
   {
@@ -90,6 +91,7 @@ const __DOWNSCALE_2 = new Conv2D(
     filter: {
       num_channels: 1,
       num: 4,
+      type: 'down',
     },
     prev: {
       num_filters: __DOWNSCALE.opts.filter.num,
@@ -116,7 +118,7 @@ const __UPSCALE = new Conv2D(
     filter: {
       num_channels: 1,
       num: 2,
-      upscale: true,
+      type: 'up',
     },
     prev: {
       num_filters: __DOWNSCALE_2.opts.filter.num,
@@ -127,32 +129,32 @@ const __UPSCALE = new Conv2D(
     fs: upscale.fs,
   }
 );
-//const __UPSCALE_2 = new Conv2D(
-//gl,
-//{
-//input: {
-//size: 16,
-//num_channels: 1,
-//texture: __UPSCALE.output,
-//},
-//output: {
-//size: 32,
-//num_channels: 1,
-//},
-//filter: {
-//num_channels: 1,
-//num: 2,
-//upscale: true,
-//},
-//prev: {
-//num_filters: __UPSCALE.opts.filter.num,
-//},
-//},
-//{
-//vs: upscale2.vs,
-//fs: upscale2.fs,
-//}
-//);
+const __UPSCALE_2 = new Conv2D(
+  gl,
+  {
+    input: {
+      size: 16,
+      num_channels: 1,
+      texture: __UPSCALE.output,
+    },
+    output: {
+      size: 32,
+      num_channels: 3,
+    },
+    filter: {
+      num_channels: 1,
+      num: 3,
+      type: 'output',
+    },
+    prev: {
+      num_filters: __UPSCALE.opts.filter.num,
+    },
+  },
+  {
+    vs: upscale2.vs,
+    fs: upscale2.fs,
+  }
+);
 
 // UPSCALE PROGRAM --------------------------------------------------------
 //const UPSCALE = createProgram(gl, upscale.vs, upscale.fs);
@@ -257,8 +259,8 @@ gl.texImage2D(
   gl.TEXTURE_2D,
   0,
   gl.R8,
-  4 * DOWNSCALE_NUM_FILTERS * UPSCALE2_NUM_FILTERS,
-  4 * DOWNSCALE_NUM_FILTERS,
+  4 * UPSCALE_NUM_FILTERS * UPSCALE2_NUM_FILTERS,
+  4 * UPSCALE_NUM_FILTERS,
   0,
   gl.RED,
   gl.UNSIGNED_BYTE,
@@ -267,8 +269,8 @@ gl.texImage2D(
   //topBottomFilter()
   //filter()
   generateImageData(
-    4 * DOWNSCALE_NUM_FILTERS * UPSCALE2_NUM_FILTERS,
-    4 * DOWNSCALE_NUM_FILTERS,
+    4 * UPSCALE_NUM_FILTERS * UPSCALE2_NUM_FILTERS,
+    4 * UPSCALE_NUM_FILTERS,
     1,
     0
   )
@@ -354,41 +356,41 @@ gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 
 // FRAMEBUFFER TEXTURES -------------------------
-const CONV2D_transpose_tex = gl.createTexture();
-gl.bindTexture(gl.TEXTURE_2D, CONV2D_transpose_tex);
-gl.texImage2D(
-  gl.TEXTURE_2D,
-  0,
-  gl.R8,
-  UPSCALE_NUM_FILTERS * UPSCALE_output_size,
-  UPSCALE_NUM_FILTERS * UPSCALE_output_size,
-  0,
-  gl.RED,
-  gl.UNSIGNED_BYTE,
-  null
-);
+//const CONV2D_transpose_tex = gl.createTexture();
+//gl.bindTexture(gl.TEXTURE_2D, CONV2D_transpose_tex);
+//gl.texImage2D(
+//gl.TEXTURE_2D,
+//0,
+//gl.R8,
+//UPSCALE_NUM_FILTERS * UPSCALE_output_size,
+//UPSCALE_NUM_FILTERS * UPSCALE_output_size,
+//0,
+//gl.RED,
+//gl.UNSIGNED_BYTE,
+//null
+//);
 
-gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-const CONV2D_2_transpose_tex = gl.createTexture();
-gl.bindTexture(gl.TEXTURE_2D, CONV2D_2_transpose_tex);
-gl.texImage2D(
-  gl.TEXTURE_2D,
-  0,
-  gl.RGB8,
-  32,
-  32,
-  0,
-  gl.RGB,
-  gl.UNSIGNED_BYTE,
-  null
-);
-gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+//gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+//gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+//gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+//gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+//const CONV2D_2_transpose_tex = gl.createTexture();
+//gl.bindTexture(gl.TEXTURE_2D, CONV2D_2_transpose_tex);
+//gl.texImage2D(
+//gl.TEXTURE_2D,
+//0,
+//gl.RGB8,
+//32,
+//32,
+//0,
+//gl.RGB,
+//gl.UNSIGNED_BYTE,
+//null
+//);
+//gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+//gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+//gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+//gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 
 // FRAMEBUFFERS ---------------------------------
 //const UPSCALE_framebuffer = gl.createFramebuffer();
@@ -400,15 +402,15 @@ gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 //CONV2D_transpose_tex,
 //0
 //);
-const UPSCALE2_framebuffer = gl.createFramebuffer();
-gl.bindFramebuffer(gl.FRAMEBUFFER, UPSCALE2_framebuffer);
-gl.framebufferTexture2D(
-  gl.FRAMEBUFFER,
-  gl.COLOR_ATTACHMENT0,
-  gl.TEXTURE_2D,
-  CONV2D_2_transpose_tex,
-  0
-);
+//const UPSCALE2_framebuffer = gl.createFramebuffer();
+//gl.bindFramebuffer(gl.FRAMEBUFFER, UPSCALE2_framebuffer);
+//gl.framebufferTexture2D(
+//gl.FRAMEBUFFER,
+//gl.COLOR_ATTACHMENT0,
+//gl.TEXTURE_2D,
+//CONV2D_2_transpose_tex,
+//0
+//);
 
 gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 gl.bindVertexArray(null);
@@ -420,7 +422,7 @@ function draw(gl, process = true) {
   __DOWNSCALE.forward();
   __DOWNSCALE_2.forward();
   __UPSCALE.forward();
-  //__UPSCALE_2.forward();
+  __UPSCALE_2.forward();
   //
   // UPSCALE --------------------------------------
   // Outputs to CONV2D_transpose_tex
@@ -531,7 +533,7 @@ function draw(gl, process = true) {
   //gl.bindVertexArray(OUTPUT_vao);
   gl.uniform1i(OUTPUT_texLoc, 0);
   gl.activeTexture(gl.TEXTURE0 + 0);
-  gl.bindTexture(gl.TEXTURE_2D, __UPSCALE.output);
+  gl.bindTexture(gl.TEXTURE_2D, __UPSCALE_2.output);
   //gl.bindTexture(gl.TEXTURE_2D, CONV2D_2_transpose_tex);
   //gl.bindTexture(gl.TEXTURE_2D, CONV2D_transpose_tex);
 
@@ -564,17 +566,17 @@ function draw(gl, process = true) {
   gl.drawArrays(gl.TRIANGLES, 0, verts.length / 2);
 
   // UPSCALE *** 2 *** Filters
-  gl.bindTexture(gl.TEXTURE_2D, UPSCALE2_filter);
+  gl.bindTexture(gl.TEXTURE_2D, __UPSCALE_2.filter);
   gl.viewport(
-    filter_size + filter_size * DOWNSCALE2_NUM_FILTERS,
+    filter_size + filter_size * __UPSCALE_2.opts.filter.num,
     0,
-    filter_size * UPSCALE2_NUM_FILTERS,
+    filter_size * __UPSCALE_2.opts.filter.num,
     filter_size
   );
   gl.scissor(
-    filter_size + filter_size * DOWNSCALE2_NUM_FILTERS,
+    filter_size + filter_size * __UPSCALE_2.opts.filter.num,
     0,
-    filter_size * UPSCALE2_NUM_FILTERS,
+    filter_size * __UPSCALE_2.opts.filter.num,
     filter_size
   );
   gl.clearColor(1.0, 1.0, 0.0, 1.0);

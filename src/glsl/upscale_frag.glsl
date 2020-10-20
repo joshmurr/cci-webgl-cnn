@@ -46,7 +46,7 @@ void main(){
     }
   }
 
-  float scale = pow(u_num_filters.x * u_num_filters.y, 2.0);
+  float scale = pow(u_num_filters.x * u_num_filters.y, 4.0);
   float sum = sum_filters / scale;
 
   outColor = vec4(sum, 0.0, 0.0, 1.0);

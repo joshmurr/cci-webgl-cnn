@@ -22,8 +22,15 @@ export default class Conv2D extends Core {
         num_channels: 1,
         num: 0,
         data: null,
-        upscale: false,
-        texel_size: null,
+        //upscale: false,
+        type: 'down',
+        shape: {
+          w: null,
+          h: null,
+        },
+        //texel_size: null,
+        //width: null,
+        //height: null,
       },
       prev: {
         num_filters: 1,
@@ -80,19 +87,15 @@ export default class Conv2D extends Core {
     [internalFormat, format] = this.getTextureFormat(
       this.opts.filter.num_channels
     );
-    this.opts.filter.texel_size = this.opts.filter.upscale
-      ? this.opts.filter.size *
-        this.opts.filter.num *
-        this.opts.prev.num_filters
-      : this.opts.filter.size * this.opts.filter.num;
+    this.opts.filter.shape = this.getFilterShape(this.opts.filter.type);
     this.filters_tex = this.createTexture({
-      width: this.opts.filter.texel_size,
-      height: this.opts.filter.texel_size,
+      width: this.opts.filter.shape.w,
+      height: this.opts.filter.shape.h,
       data: this.opts.filter.data
         ? this.opts.filter.data
         : this.generateImageData(
-            this.opts.filter.texel_size,
-            this.opts.filter.texel_size,
+            this.opts.filter.shape.w,
+            this.opts.filter.shape.h,
             this.opts.filter.num_channels
           ),
       internalFormat: internalFormat,
@@ -103,13 +106,41 @@ export default class Conv2D extends Core {
     [internalFormat, format] = this.getTextureFormat(
       this.opts.output.num_channels
     );
+    const outputShape =
+      this.opts.filter.type !== 'output'
+        ? this.opts.output.size * this.opts.filter.num
+        : this.opts.output.size;
     this.output_tex = this.createTexture({
-      width: this.opts.output.size * this.opts.filter.num,
-      height: this.opts.output.size * this.opts.filter.num,
+      width: outputShape,
+      height: outputShape,
       data: null,
       internalFormat: internalFormat,
       format: format,
     });
+  }
+
+  getFilterShape(_type) {
+    let w, h;
+    switch (_type) {
+      case 'down':
+        w = h = this.opts.filter.size * this.opts.filter.num;
+        return { w: w, h: h };
+      case 'up':
+        w = h =
+          this.opts.filter.size *
+          this.opts.filter.num *
+          this.opts.prev.num_filters;
+        return { w: w, h: h };
+      case 'output':
+        w =
+          this.opts.filter.size *
+          this.opts.filter.num *
+          this.opts.prev.num_filters;
+        h = this.opts.filter.size * this.opts.prev.num_filters;
+        return { w: w, h: h };
+      default:
+        throw "Type must be 'down', 'up' or 'output'.";
+    }
   }
 
   get input() {
@@ -147,8 +178,8 @@ export default class Conv2D extends Core {
 
     this.gl.uniform2f(
       this.uniforms.filter_texel_size,
-      1 / this.opts.filter.texel_size,
-      1 / this.opts.filter.texel_size
+      1 / this.opts.filter.shape.w,
+      1 / this.opts.filter.shape.h
     );
     this.gl.uniform2f(
       this.uniforms.input_texel_size,
@@ -178,7 +209,7 @@ export default class Conv2D extends Core {
     this.gl.uniform2f(
       this.uniforms.num_filters,
       this.opts.filter.num,
-      this.opts.filter.num
+      this.opts.filter.type !== 'output' ? this.opts.filter.num : 1
     );
 
     this.gl.drawArrays(this.gl.TRIANGLES, 0, this.verts.length / 2);
