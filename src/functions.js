@@ -90,7 +90,7 @@ export function generateLine(w, h, d) {
   return data;
 }
 
-export function generateFour() {
+export function generateFour(num_channels) {
   let d = [
       0,   0,   0,   0,   0, 255, 255, 255, 255,   0,   0,   0,   0,   0,   0,   0,   0,   0, 255, 255, 255, 255,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, 
       0,   0,   0,   0,   0, 255, 255, 255, 255,   0,   0,   0,   0,   0,   0,   0,   0,   0, 255, 255, 255, 255,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, 
@@ -127,9 +127,10 @@ export function generateFour() {
   ]; //prettier-ignore
   let data = [];
   for (let i = 0; i < d.length; i++) {
-    data.push(d[i] === 0 ? Math.floor(Math.random() * 10) : d[i]);
-    data.push(d[i] === 0 ? Math.floor(Math.random() * 10) : d[i]);
-    data.push(d[i] === 0 ? Math.floor(Math.random() * 10) : d[i]);
+    for (let j = 0; j < num_channels; j++) {
+      data.push(d[i]);
+      //data.push(d[i] === 0 ? Math.floor(Math.random() * 10) : d[i]);
+    }
   }
   //console.log(data);
   return new Uint8Array(data);
@@ -264,7 +265,7 @@ export function handleFileInput(e) {
 
   reader.onload = (e) => {
     const res = parseData(e.target.result);
-    console.log(res);
+    //console.log(res);
   };
 
   reader.readAsArrayBuffer(file);

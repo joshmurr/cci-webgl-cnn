@@ -42,6 +42,7 @@ export default class Conv2D extends Core {
       // Textures
       input_tex: this.gl.getUniformLocation(this.program, 'u_texture'),
       filters_tex: this.gl.getUniformLocation(this.program, 'u_filter'),
+      filters_smask: this.gl.getUniformLocation(this.program, 'u_filter_smask'),
       //
       texel_size: this.gl.getUniformLocation(
         this.program,
@@ -100,6 +101,16 @@ export default class Conv2D extends Core {
       format: this.gl[format],
     });
 
+    // FILTER SIGNED MASK ------------------------------
+    this.filters_smask = this.createTexture({
+      width: this.opts.filter.shape.w,
+      height: this.opts.filter.shape.h,
+      data: null,
+      internalFormat: this.gl.R8_SNORM,
+      format: this.gl.RED,
+      dataType: this.gl.BYTE,
+    });
+
     // OUTPUT -------------------------------------------
     ({ internalFormat, format } = this.getTextureFormat(
       this.opts.output.num_channels
@@ -111,6 +122,39 @@ export default class Conv2D extends Core {
       internalFormat: this.gl[internalFormat],
       format: this.gl[format],
     });
+  }
+
+  updateFilterData(_data) {
+    //this.gl.activeTexture(this.gl.TEXTURE0);
+    this.gl.bindTexture(this.gl.TEXTURE_2D, this.filters_tex);
+    const { internalFormat, format } = this.getTextureFormat(
+      this.opts.filter.num_channels
+    );
+    this.gl.texImage2D(
+      this.gl.TEXTURE_2D,
+      0,
+      this.gl.R32F,
+      this.opts.filter.shape.w,
+      this.opts.filter.shape.h,
+      0,
+      this.gl.RED,
+      this.gl.FLOAT,
+      _data.map((i) => Math.abs(i))
+    );
+
+    this.gl.bindTexture(this.gl.TEXTURE_2D, this.filters_smask);
+    this.gl.texImage2D(
+      this.gl.TEXTURE_2D,
+      0,
+      this.gl.R8_SNORM,
+      this.opts.filter.shape.w,
+      this.opts.filter.shape.h,
+      0,
+      this.gl.RED,
+      this.gl.BYTE,
+      new Int8Array(_data.map((i) => (i < 0 ? 128 : 127))) // 128=-1, 127=1
+    );
+    this.gl.bindTexture(this.gl.TEXTURE_2D, null);
   }
 
   getFilterShape(_type) {
@@ -155,6 +199,7 @@ export default class Conv2D extends Core {
 
     this.gl.uniform1i(this.uniforms.input_tex, 0);
     this.gl.uniform1i(this.uniforms.filters_tex, 1);
+    this.gl.uniform1i(this.uniforms.filters_smask, 2);
     this.gl.activeTexture(this.gl.TEXTURE0 + 0);
     this.gl.bindTexture(
       this.gl.TEXTURE_2D,
@@ -162,6 +207,9 @@ export default class Conv2D extends Core {
     );
     this.gl.activeTexture(this.gl.TEXTURE0 + 1);
     this.gl.bindTexture(this.gl.TEXTURE_2D, this.filters_tex);
+    this.gl.activeTexture(this.gl.TEXTURE0 + 2);
+    this.gl.bindTexture(this.gl.TEXTURE_2D, this.filters_smask);
+
     this.gl.viewport(
       0,
       0,

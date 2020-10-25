@@ -6,7 +6,9 @@ import {
   handleFileInput,
 } from './functions.js';
 import Conv2D from './conv2d_class.js';
+import NP_Loader from './numpy_loader.js';
 import './styles.css';
+import F from './filters/tf-autoencoder/encoder/conv2d_kernel.npy';
 
 const BASIC_VERT = require('./glsl/basic_vert.glsl');
 
@@ -23,13 +25,18 @@ if (!gl) console.error('No WebGL2 support!');
 const verts =      [-1, -1, -1, 1,  1, -1,   -1, 1, 1,  1, 1, -1]; //prettier-ignore
 const tex_coords = [ 0,  1,  0, 0,  1,  1,    0, 0, 1,  0, 1,  1]; //prettier-ignore
 
+const filterInput = document.getElementById('filter');
+filterInput.addEventListener('change', handleFileInput, false);
+const f1 = new NP_Loader();
+let res;
+
 const __DOWNSCALE = new Conv2D(
   gl,
   {
     input: {
       size: 32,
-      num_channels: 3,
-      data: generateFour(),
+      num_channels: 1,
+      data: generateFour(1),
       //data: generateImageData(32, 32, 3),
       //texture: __DOWNSCALE_a.output,
     },
@@ -38,7 +45,7 @@ const __DOWNSCALE = new Conv2D(
       num_channels: 1,
     },
     filter: {
-      num_channels: 3,
+      num_channels: 1,
       num: 2,
       type: 'down',
     },
@@ -48,6 +55,10 @@ const __DOWNSCALE = new Conv2D(
     fs: require('./glsl/downscale_frag.glsl'),
   }
 );
+f1.loadTwo(F).then((r) => {
+  __DOWNSCALE.updateFilterData(r.data);
+  draw(gl);
+});
 const __DOWNSCALE_2 = new Conv2D(
   gl,
   {
@@ -180,7 +191,7 @@ gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 gl.bindVertexArray(null);
 gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
-function draw(gl, process = true) {
+function draw(gl) {
   const start = performance.now();
   gl.bindVertexArray(OUTPUT_vao);
 
@@ -280,9 +291,5 @@ function resize(gl) {
   }
 }
 
-document
-  .getElementById('filter')
-  .addEventListener('change', handleFileInput, false);
-
 resize(gl);
-draw(gl, true);
+draw(gl);
