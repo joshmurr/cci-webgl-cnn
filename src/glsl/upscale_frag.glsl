@@ -14,10 +14,10 @@ uniform vec2 u_output_size;
 out vec4 outColor;
 
 float get(vec2 _st, vec2 _filter_offset, vec2 _offset){
-  vec2 tex_lookup = _st + (_offset * u_input_texel_size);
-  vec2 filter_lookup = _filter_offset + (((_offset*2.0)+vec2(1.5)) * u_filter_texel_size);
+  float tex_lookup = texture(u_texture, _st + (_offset * u_input_texel_size)).r;// * 2.0 - 1.0;
+  float filter_lookup = texture(u_filter, _filter_offset + (((_offset*2.0)+vec2(1.5)) * u_filter_texel_size)).r;// * 2.0 - 1.0;
 
-  return texture(u_texture, tex_lookup).r * texture(u_filter, filter_lookup).r;// * 2.0 - 1.0);
+  return tex_lookup * filter_lookup;
 } 
 
 void main(){

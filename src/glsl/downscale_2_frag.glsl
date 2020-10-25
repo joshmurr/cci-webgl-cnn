@@ -15,10 +15,10 @@ uniform vec2 u_output_size;
 out vec4 outColor;
 
 float get(vec2 _st, vec2 _filter_offset, vec2 _offset){
-  vec2 input_lookup = _st + (_offset*u_input_texel_size);
-  vec2 filter_lookup = _filter_offset + (_offset*u_filter_texel_size);
+  float input_lookup = texture(u_texture, _st + (_offset*u_input_texel_size)).r;// * 2.0 - 1.0;
+  float filter_lookup = texture(u_filter, _filter_offset + (_offset*u_filter_texel_size)).r;//* 2.0 - 1.0;
 
-  return texture(u_texture, input_lookup).r * texture(u_filter, filter_lookup).r;// * 2.0 - 1.0);
+  return input_lookup * filter_lookup;
 } 
 
 void main() {
@@ -51,7 +51,5 @@ void main() {
   float sum = dot(sum_row, vec3(1.0)) / scale; // Sum vector components and average.
 
   outColor = vec4(sum, 0.0, 0.0, 1.0);
-
-  //outColor = texture(u_texture, input_st);
 
 }

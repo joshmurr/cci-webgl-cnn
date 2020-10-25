@@ -38,7 +38,7 @@ const __DOWNSCALE = new Conv2D(
     },
     filter: {
       num_channels: 3,
-      num: 4,
+      num: 2,
       type: 'down',
     },
   },
@@ -61,7 +61,7 @@ const __DOWNSCALE_2 = new Conv2D(
     },
     filter: {
       num_channels: 1,
-      num: 8,
+      num: 4,
       type: 'down',
     },
     prev: {
@@ -88,7 +88,7 @@ const __UPSCALE = new Conv2D(
     },
     filter: {
       num_channels: 1,
-      num: 4,
+      num: 2,
       type: 'up',
     },
     prev: {

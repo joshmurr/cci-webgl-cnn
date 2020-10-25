@@ -102,22 +102,23 @@ export default class Core {
   generateImageData(w, h, num_channels) {
     let len = w * h * num_channels;
     let data = [];
-    const range = this.getFilterRange();
+    //const range = this.getFilterRange(this.opts.filter.type);
     for (let i = 0; i < len; i++) {
-      let val = Math.random() * (range.max - range.min);
-      data.push(Math.floor(val + range.min));
+      //let val = Math.random() * (range.max - range.min);
+      //data.push(Math.floor(val + range.min));
+      data.push(Math.floor(Math.random() * 255));
     }
+
     return new Uint8Array(data);
+    //return new Int8Array(data);
   }
 
   getFilterRange(_r) {
     switch (_r) {
       case 'down':
-        return { min: 0, max: 10 };
       case 'up':
-        return { min: 2, max: 10 };
+      case 'input':
       case 'output':
-        return { min: 4, max: 10 };
       default:
         return { min: 0, max: 255 };
     }
@@ -126,15 +127,15 @@ export default class Core {
   getTextureFormat(num_channels) {
     switch (num_channels) {
       case 1:
-        return [this.gl.R8, this.gl.RED];
-      case 2:
-        return [this.gl.RG8, this.gl.RG];
+        return {
+          internalFormat: 'R8',
+          format: 'RED',
+        };
       case 3:
-        return [this.gl.RGB8, this.gl.RGB];
-      case 4:
-        return [this.gl.RGBA8, this.gl.RGBA];
-      default:
-        return [this.gl.RGB8, this.gl.RGB];
+        return {
+          internalFormat: 'RGB8',
+          format: 'RGB',
+        };
     }
   }
 }

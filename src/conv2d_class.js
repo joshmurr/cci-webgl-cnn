@@ -6,6 +6,7 @@ export default class Conv2D extends Core {
 
     this.program = this.createProgram(_program.vs, _program.fs);
 
+    // Default options:
     this.opts = {
       input: {
         size: 1,
@@ -22,20 +23,21 @@ export default class Conv2D extends Core {
         num_channels: 1,
         num: 0,
         data: null,
-        //upscale: false,
         type: 'down',
         shape: {
           w: null,
           h: null,
         },
-        //texel_size: null,
-        //width: null,
-        //height: null,
       },
       prev: {
         num_filters: 1,
       },
     };
+    // Copy options passed to object
+    for (const prop in this.opts) {
+      Object.assign(this.opts[prop], _opts[prop]);
+    }
+
     this.uniforms = {
       // Textures
       input_tex: this.gl.getUniformLocation(this.program, 'u_texture'),
@@ -61,10 +63,6 @@ export default class Conv2D extends Core {
         'u_num_filters_prev'
       ),
     };
-    // Copy options passed to object
-    for (const prop in this.opts) {
-      Object.assign(this.opts[prop], _opts[prop]);
-    }
 
     this.initTextures();
     this.output_fb = this.createFramebuffer(this.output_tex);
@@ -72,21 +70,21 @@ export default class Conv2D extends Core {
 
   initTextures() {
     // INPUT --------------------------------------------
-    let [internalFormat, format] = this.getTextureFormat(
+    let { internalFormat, format } = this.getTextureFormat(
       this.opts.input.num_channels
     );
     this.input_tex = this.createTexture({
       width: this.opts.input.size * this.opts.prev.num_filters,
       height: this.opts.input.size * this.opts.prev.num_filters,
       data: this.opts.input.data,
-      internalFormat: internalFormat,
-      format: format,
+      internalFormat: this.gl[internalFormat],
+      format: this.gl[format],
     });
 
     // FILTERS ------------------------------------------
-    [internalFormat, format] = this.getTextureFormat(
+    ({ internalFormat, format } = this.getTextureFormat(
       this.opts.filter.num_channels
-    );
+    ));
     this.opts.filter.shape = this.getFilterShape(this.opts.filter.type);
     this.filters_tex = this.createTexture({
       width: this.opts.filter.shape.w,
@@ -98,24 +96,20 @@ export default class Conv2D extends Core {
             this.opts.filter.shape.h,
             this.opts.filter.num_channels
           ),
-      internalFormat: internalFormat,
-      format: format,
+      internalFormat: this.gl[internalFormat],
+      format: this.gl[format],
     });
 
     // OUTPUT -------------------------------------------
-    [internalFormat, format] = this.getTextureFormat(
+    ({ internalFormat, format } = this.getTextureFormat(
       this.opts.output.num_channels
-    );
-    const outputShape =
-      this.opts.filter.type !== 'output'
-        ? this.opts.output.size * this.opts.filter.num
-        : this.opts.output.size;
+    ));
     this.output_tex = this.createTexture({
-      width: outputShape,
-      height: outputShape,
+      width: this.opts.output.size * this.opts.filter.num,
+      height: this.opts.output.size * this.opts.filter.num,
       data: null,
-      internalFormat: internalFormat,
-      format: format,
+      internalFormat: this.gl[internalFormat],
+      format: this.gl[format],
     });
   }
 
