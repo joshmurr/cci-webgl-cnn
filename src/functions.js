@@ -227,3 +227,45 @@ export function topBottomFilter(num) {
     }
   return new Uint8Array(filter);
 }
+
+function parseData(data) {
+  const headerLen = new DataView(data.slice(8, 10)).getUint8(0);
+  const offsetBytes = 10 + headerLen;
+
+  let headerContents = new TextDecoder('utf-8').decode(
+    new Uint8Array(data.slice(10, offsetBytes))
+  );
+
+  const header = JSON.parse(
+    headerContents
+      .replace(/'/g, '"')
+      .replace('False', 'false')
+      .replace('(', '[')
+      .replace(/,*\),*/g, ']')
+  );
+  const shape = header.shape;
+
+  let nums = new Float64Array(data, offsetBytes);
+
+  return {
+    dtype: 'Float64Array',
+    data: nums,
+    shape: shape,
+  };
+}
+
+export function handleFileInput(e) {
+  const files = e.target.files;
+
+  if (files.length > 1) console.log('Too many files');
+
+  const file = files[0];
+  const reader = new FileReader();
+
+  reader.onload = (e) => {
+    const res = parseData(e.target.result);
+    console.log(res);
+  };
+
+  reader.readAsArrayBuffer(file);
+}

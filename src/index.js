@@ -3,6 +3,7 @@ import {
   createTexture,
   generateFour,
   generateImageData,
+  handleFileInput,
 } from './functions.js';
 import Conv2D from './conv2d_class.js';
 import './styles.css';
@@ -278,6 +279,10 @@ function resize(gl) {
     gl.canvas.height = displayHeight;
   }
 }
+
+document
+  .getElementById('filter')
+  .addEventListener('change', handleFileInput, false);
 
 resize(gl);
 draw(gl, true);
