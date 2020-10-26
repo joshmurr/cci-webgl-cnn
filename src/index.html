@@ -5,7 +5,14 @@
     <title><%= htmlWebpackPlugin.options.title %></title>
   </head>
   <body>
-    <input type="file" id="filter" name="files[]" />
+    <!--<input type="file" id="filter" name="files[]" />-->
+    <video autoplay id="video"></video>
+    <div class="container">
+      <button type="button">Init Webcam</button>
+      <button type="button">Stop Webcam</button>
+      <button type="button">Step</button>
+      <button type="button">Play</button>
+    </div>
     <canvas id="c"></canvas>
   </body>
 </html>

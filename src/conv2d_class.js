@@ -95,7 +95,8 @@ export default class Conv2D extends Core {
         : this.generateImageData(
             this.opts.filter.shape.w,
             this.opts.filter.shape.h,
-            this.opts.filter.num_channels
+            this.opts.filter.num_channels,
+            100
           ),
       internalFormat: this.gl[internalFormat],
       format: this.gl[format],
@@ -157,6 +158,25 @@ export default class Conv2D extends Core {
     //this.gl.BYTE,
     //new Int8Array(_data.map((i) => (i < 0 ? 128 : 127))) // 128=-1, 127=1
     //);
+    this.gl.bindTexture(this.gl.TEXTURE_2D, null);
+  }
+
+  updateInputTexture(_elem) {
+    const { internalFormat, format } = this.getTextureFormat(
+      this.opts.input.num_channels
+    );
+    this.gl.bindTexture(this.gl.TEXTURE_2D, this.input_tex);
+    this.gl.texImage2D(
+      this.gl.TEXTURE_2D,
+      0,
+      this.gl[internalFormat],
+      this.opts.input.size,
+      this.opts.input.size,
+      0,
+      this.gl[format],
+      this.gl.UNSIGNED_BYTE,
+      _elem
+    );
     this.gl.bindTexture(this.gl.TEXTURE_2D, null);
   }
 

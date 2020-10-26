@@ -45,12 +45,7 @@ const fs = `#version 300 es
   out vec4 outcolor;
 
   void main(){
-    //outcolor = vec4(0.0, 1.0, 1.0, 1.0);
     outcolor = texture(u_texture, v_texcoord);
-    //outcolor.r += 1.0;
-    //outcolor.r *= 0.5;
-    //
-    outcolor = vec4(-0.5, -0.5, -0.5, 1.0);
   }
 `;
 
@@ -102,37 +97,18 @@ gl.bindTexture(gl.TEXTURE_2D, texture);
 gl.texImage2D(
   gl.TEXTURE_2D,
   0,
-  gl.R8_SNORM,
-  4,
-  2,
+  gl.RGB8,
+  32,
+  32,
   0,
-  gl.RED,
-  gl.BYTE,
-  new Int8Array([0, 42, 85, 127, 128, 170, 212, 255])
+  gl.RGB,
+  gl.UNSIGNED_BYTE,
+  null
 );
 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-// -----------------------------------------------------
-
-// FRAMEBUFFER -----------------------------------------
-const fb_tex = gl.createTexture();
-gl.activeTexture(gl.TEXTURE0 + 0);
-gl.bindTexture(gl.TEXTURE_2D, fb_tex);
-gl.texImage2D(gl.TEXTURE_2D, 0, gl.R8_SNORM, 4, 2, 0, gl.RED, gl.BYTE, null);
-gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-const framebuffer = gl.createFramebuffer();
-gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
-gl.framebufferTexture2D(
-  gl.FRAMEBUFFER,
-  gl.COLOR_ATTACHMENT0,
-  gl.TEXTURE_2D,
-  fb_tex,
-  0
-);
-//gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 // -----------------------------------------------------
 
 const framebufferStatus = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
@@ -142,17 +118,9 @@ gl.useProgram(program);
 gl.uniform1i(gl.getUniformLocation(program, 'u_texture'), 0);
 
 function step() {
-  //gl.texImage2D(gl.TEXTURE_2D, 0, gl.R8_SNORM, gl.RED, gl.BYTE, video);
-  gl.viewport(0, 0, 4, 2);
-  //gl.clearColor(0.1, 0.2, 0.5, 1.0);
-  gl.clear(gl.COLOR_BUFFER_BIT);
-  gl.bindTexture(gl.TEXTURE_2D, texture);
-  gl.drawArrays(gl.TRIANGLES, 0, 6);
-
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB8, gl.RGB, gl.UNSIGNED_BYTE, video);
   gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
-  gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-  gl.bindTexture(gl.TEXTURE_2D, fb_tex);
-  //gl.drawArrays(gl.TRIANGLES, 0, 6);
+  gl.drawArrays(gl.TRIANGLES, 0, 6);
 }
 
 console.log('glError:', gl.getError());

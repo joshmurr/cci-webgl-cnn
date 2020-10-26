@@ -6,12 +6,13 @@ import {
   handleFileInput,
 } from './functions.js';
 import Conv2D from './conv2d_class.js';
-import NP_Loader from './numpy_loader.js';
+//import NP_Loader from './numpy_loader.js';
+import WebcamHandler from './webcam_handler.js';
 import './styles.css';
-import D1 from './filters/tf-autoencoder/encoder/conv2d_6_kernel.npy';
-import D2 from './filters/tf-autoencoder/encoder/conv2d_7_kernel.npy';
-import U1 from './filters/tf-autoencoder/decoder/conv2d_transpose_4_kernel.npy';
-import U2 from './filters/tf-autoencoder/decoder/conv2d_transpose_5_kernel.npy';
+//import D1 from './filters/tf-autoencoder/encoder/conv2d_6_kernel.npy';
+//import D2 from './filters/tf-autoencoder/encoder/conv2d_7_kernel.npy';
+//import U1 from './filters/tf-autoencoder/decoder/conv2d_transpose_4_kernel.npy';
+//import U2 from './filters/tf-autoencoder/decoder/conv2d_transpose_5_kernel.npy';
 
 const BASIC_VERT = require('./glsl/basic_vert.glsl');
 
@@ -28,17 +29,27 @@ if (!gl) console.error('No WebGL2 support!');
 const verts =      [-1, -1, -1, 1,  1, -1,   -1, 1, 1,  1, 1, -1]; //prettier-ignore
 const tex_coords = [ 0,  1,  0, 0,  1,  1,    0, 0, 1,  0, 1,  1]; //prettier-ignore
 
-//const filterInput = document.getElementById('filter');
-//filterInput.addEventListener('change', handleFileInput, false);
-const np_loader = new NP_Loader();
+//const np_loader = new NP_Loader();
+const webcam = document.getElementById('video');
+const webcamHandler = new WebcamHandler(webcam);
+
+let PLAY = false;
+const buttons = document.getElementsByTagName('button');
+buttons[0].addEventListener('click', (e) => webcamHandler.initCam());
+buttons[1].addEventListener('click', (e) => webcamHandler.stopCam());
+buttons[2].addEventListener('click', (e) => draw(gl));
+buttons[3].addEventListener('click', (e) => {
+  PLAY = !PLAY;
+  draw();
+});
 
 const __DOWNSCALE = new Conv2D(
   gl,
   {
     input: {
       size: 32,
-      num_channels: 1,
-      data: generateFour(1),
+      num_channels: 3,
+      data: generateFour(3),
       //data: generateImageData(32, 32, 3),
       //texture: __DOWNSCALE_a.output,
     },
@@ -47,8 +58,8 @@ const __DOWNSCALE = new Conv2D(
       num_channels: 1,
     },
     filter: {
-      num_channels: 1,
-      num: 2,
+      num_channels: 3,
+      num: 16,
       type: 'down',
     },
   },
@@ -80,7 +91,7 @@ const __DOWNSCALE_2 = new Conv2D(
     },
     filter: {
       num_channels: 1,
-      num: 4,
+      num: 22,
       type: 'down',
     },
     prev: {
@@ -101,11 +112,64 @@ const __DOWNSCALE_2 = new Conv2D(
 //draw(gl);
 //});
 
+//const __DOWNSCALE_3 = new Conv2D(
+//gl,
+//{
+//input: {
+//size: __DOWNSCALE_2.opts.output.size,
+//num_channels: 1,
+//texture: __DOWNSCALE_2.output,
+//},
+//output: {
+//size: 4,
+//num_channels: 1,
+//},
+//filter: {
+//num_channels: 1,
+//num: 22,
+//type: 'down',
+//},
+//prev: {
+//num_filters: __DOWNSCALE.opts.filter.num,
+//},
+//},
+//{
+//vs: BASIC_VERT,
+//fs: require('./glsl/downscale_2_frag.glsl'),
+//}
+//);
+//const __UPSCALE_a = new Conv2D(
+//gl,
+//{
+//input: {
+//size: __DOWNSCALE_3.opts.output.size,
+//num_channels: 1,
+//texture: __DOWNSCALE_3.output,
+//},
+//output: {
+//size: 8,
+//num_channels: 1,
+//},
+//filter: {
+//num_channels: 1,
+//num: 22,
+//type: 'up',
+//},
+//prev: {
+//num_filters: __DOWNSCALE_3.opts.filter.num,
+//},
+//},
+//{
+//vs: BASIC_VERT,
+//fs: require('./glsl/upscale_frag.glsl'),
+//}
+//);
+
 const __UPSCALE = new Conv2D(
   gl,
   {
     input: {
-      size: 8,
+      size: __DOWNSCALE_2.opts.output.size,
       num_channels: 1,
       texture: __DOWNSCALE_2.output,
     },
@@ -115,7 +179,7 @@ const __UPSCALE = new Conv2D(
     },
     filter: {
       num_channels: 1,
-      num: 2,
+      num: 16,
       type: 'up',
     },
     prev: {
@@ -140,7 +204,7 @@ const __UPSCALE_2 = new Conv2D(
   gl,
   {
     input: {
-      size: 16,
+      size: __UPSCALE.opts.output.size,
       num_channels: 1,
       texture: __UPSCALE.output,
     },
@@ -219,9 +283,13 @@ gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 gl.bindVertexArray(null);
 gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
-function draw(gl) {
+function draw() {
   const start = performance.now();
   gl.bindVertexArray(OUTPUT_vao);
+
+  if (webcamHandler.camActive) {
+    __DOWNSCALE.updateInputTexture(webcam);
+  }
 
   // COMPUTATIONAL GRAPH --------------------------
   __DOWNSCALE.forward();
@@ -299,6 +367,10 @@ function draw(gl) {
   gl.bindVertexArray(null);
   gl.bindBuffer(gl.ARRAY_BUFFER, null);
   console.log(performance.now() - start);
+
+  if (PLAY) {
+    requestAnimationFrame(draw);
+  }
 }
 
 function resize(gl) {
@@ -320,4 +392,4 @@ function resize(gl) {
 }
 
 resize(gl);
-draw(gl);
+requestAnimationFrame(draw);

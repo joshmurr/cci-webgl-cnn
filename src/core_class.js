@@ -99,14 +99,15 @@ export default class Core {
     return fb;
   }
 
-  generateImageData(w, h, num_channels) {
+  generateImageData(w, h, num_channels, r) {
     let len = w * h * num_channels;
     let data = [];
     //const range = this.getFilterRange(this.opts.filter.type);
     for (let i = 0; i < len; i++) {
       //let val = Math.random() * (range.max - range.min);
       //data.push(Math.floor(val + range.min));
-      data.push(Math.floor(Math.random() * 255));
+      let s = r ? r : 255;
+      data.push(Math.floor(Math.random() * s));
     }
 
     return new Uint8Array(data);

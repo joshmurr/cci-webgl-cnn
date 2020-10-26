@@ -59,9 +59,9 @@ export function generateImageData(w, h, num_channels, value = null) {
   for (let i = 0; i < w * num_channels; i += num_channels)
     for (let j = 0; j < h; j++)
       for (let c = 0; c < num_channels; c++) {
-        data[i + w * num_channels * j + c] = value
-          ? value
-          : Math.floor(Math.random() * 255);
+        data[i + w * num_channels * j + c] = Math.floor(
+          Math.random() * value ? value : 255
+        );
       }
   return data;
 }

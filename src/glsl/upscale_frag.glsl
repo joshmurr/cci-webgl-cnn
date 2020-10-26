@@ -47,7 +47,7 @@ void main(){
   }
 
   //float scale = pow(u_num_filters_prev.x, u_num_filters.y);
-  float scale = pow(2.0, u_num_filters_prev.y);
+  float scale = pow(1.25, u_num_filters_prev.y);
   //float scale = u_num_filters_prev.x * u_num_filters_prev.y;
   float sum = sum_filters / scale;
 
