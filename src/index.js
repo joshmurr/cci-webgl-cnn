@@ -8,7 +8,10 @@ import {
 import Conv2D from './conv2d_class.js';
 import NP_Loader from './numpy_loader.js';
 import './styles.css';
-import F from './filters/tf-autoencoder/encoder/conv2d_kernel.npy';
+import D1 from './filters/tf-autoencoder/encoder/conv2d_6_kernel.npy';
+import D2 from './filters/tf-autoencoder/encoder/conv2d_7_kernel.npy';
+import U1 from './filters/tf-autoencoder/decoder/conv2d_transpose_4_kernel.npy';
+import U2 from './filters/tf-autoencoder/decoder/conv2d_transpose_5_kernel.npy';
 
 const BASIC_VERT = require('./glsl/basic_vert.glsl');
 
@@ -25,10 +28,9 @@ if (!gl) console.error('No WebGL2 support!');
 const verts =      [-1, -1, -1, 1,  1, -1,   -1, 1, 1,  1, 1, -1]; //prettier-ignore
 const tex_coords = [ 0,  1,  0, 0,  1,  1,    0, 0, 1,  0, 1,  1]; //prettier-ignore
 
-const filterInput = document.getElementById('filter');
-filterInput.addEventListener('change', handleFileInput, false);
-const f1 = new NP_Loader();
-let res;
+//const filterInput = document.getElementById('filter');
+//filterInput.addEventListener('change', handleFileInput, false);
+const np_loader = new NP_Loader();
 
 const __DOWNSCALE = new Conv2D(
   gl,
@@ -55,10 +57,15 @@ const __DOWNSCALE = new Conv2D(
     fs: require('./glsl/downscale_frag.glsl'),
   }
 );
-f1.loadTwo(F).then((r) => {
-  __DOWNSCALE.updateFilterData(r.data);
-  draw(gl);
-});
+//np_loader.load(D1).then((r) => {
+//console.group('Downscale 1');
+//console.log(__DOWNSCALE.opts.filter.shape);
+//console.log(r);
+//console.groupEnd();
+//__DOWNSCALE.updateFilterData(r);
+//draw(gl);
+//});
+
 const __DOWNSCALE_2 = new Conv2D(
   gl,
   {
@@ -85,6 +92,14 @@ const __DOWNSCALE_2 = new Conv2D(
     fs: require('./glsl/downscale_2_frag.glsl'),
   }
 );
+//np_loader.load(D2).then((r) => {
+//console.group('Downscale 2');
+//console.log(__DOWNSCALE_2.opts.filter.shape);
+//console.log(r);
+//console.groupEnd();
+//__DOWNSCALE_2.updateFilterData(r);
+//draw(gl);
+//});
 
 const __UPSCALE = new Conv2D(
   gl,
@@ -112,6 +127,15 @@ const __UPSCALE = new Conv2D(
     fs: require('./glsl/upscale_frag.glsl'),
   }
 );
+//np_loader.load(U1).then((r) => {
+//console.group('Upscale');
+//console.log(__UPSCALE.opts.filter.shape);
+//console.log(r);
+//console.groupEnd();
+//__UPSCALE.updateFilterData(r);
+//draw(gl);
+//});
+
 const __UPSCALE_2 = new Conv2D(
   gl,
   {
@@ -138,6 +162,10 @@ const __UPSCALE_2 = new Conv2D(
     fs: require('./glsl/upscale_2_frag.glsl'),
   }
 );
+//np_loader.load(U2).then((r) => {
+//__UPSCALE_2.updateFilterData(r);
+//draw(gl);
+//});
 
 // OUTPUT PROGRAM --------------------------------------------------------
 const OUTPUT = createProgram(gl, output.vs, output.fs);

@@ -4,7 +4,7 @@ precision highp sampler2D;
  
 uniform sampler2D u_texture; // 32x32x3
 uniform sampler2D u_filter;  // 4x4x3
-uniform sampler2D u_filter_smask;  // 4x4x3
+//uniform sampler2D u_filter_smask;  // 4x4x3
 uniform vec2 u_num_filters;
 uniform vec2 u_input_texel_size;
 uniform vec2 u_output_texel_size;
@@ -16,9 +16,9 @@ vec3 get(vec2 _st, vec2 _filter_offset, vec2 _offset){
   // Returns given pixel value * relavent filter value
   vec3 input_lookup = texture(u_texture, _st + (_offset*u_input_texel_size)).rgb;// * 2.0 - 1.0;
   vec3 filter_lookup = texture(u_filter, _filter_offset + (_offset*u_filter_texel_size)).rgb;// * 2.0 - 1.0;
-  float smask_lookup = texture(u_filter_smask, _filter_offset + (_offset*u_filter_texel_size)).r;// * 2.0 - 1.0;
+  //float smask_lookup = texture(u_filter_smask, _filter_offset + (_offset*u_filter_texel_size)).r;// * 2.0 - 1.0;
 
-  return input_lookup * filter_lookup * smask_lookup;
+  return input_lookup * filter_lookup;// * smask_lookup;
 } 
 
 void main() {

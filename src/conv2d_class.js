@@ -102,14 +102,14 @@ export default class Conv2D extends Core {
     });
 
     // FILTER SIGNED MASK ------------------------------
-    this.filters_smask = this.createTexture({
-      width: this.opts.filter.shape.w,
-      height: this.opts.filter.shape.h,
-      data: null,
-      internalFormat: this.gl.R8_SNORM,
-      format: this.gl.RED,
-      dataType: this.gl.BYTE,
-    });
+    //this.filters_smask = this.createTexture({
+    //width: this.opts.filter.shape.w,
+    //height: this.opts.filter.shape.h,
+    //data: null,
+    //internalFormat: this.gl.R8_SNORM,
+    //format: this.gl.RED,
+    //dataType: this.gl.BYTE,
+    //});
 
     // OUTPUT -------------------------------------------
     ({ internalFormat, format } = this.getTextureFormat(
@@ -130,6 +130,9 @@ export default class Conv2D extends Core {
     const { internalFormat, format } = this.getTextureFormat(
       this.opts.filter.num_channels
     );
+
+    console.log(_data.shape);
+
     this.gl.texImage2D(
       this.gl.TEXTURE_2D,
       0,
@@ -139,21 +142,21 @@ export default class Conv2D extends Core {
       0,
       this.gl.RED,
       this.gl.FLOAT,
-      _data.map((i) => Math.abs(i))
+      _data.data.map((i) => (i + 1.0) * 0.5)
     );
 
-    this.gl.bindTexture(this.gl.TEXTURE_2D, this.filters_smask);
-    this.gl.texImage2D(
-      this.gl.TEXTURE_2D,
-      0,
-      this.gl.R8_SNORM,
-      this.opts.filter.shape.w,
-      this.opts.filter.shape.h,
-      0,
-      this.gl.RED,
-      this.gl.BYTE,
-      new Int8Array(_data.map((i) => (i < 0 ? 128 : 127))) // 128=-1, 127=1
-    );
+    //this.gl.bindTexture(this.gl.TEXTURE_2D, this.filters_smask);
+    //this.gl.texImage2D(
+    //this.gl.TEXTURE_2D,
+    //0,
+    //this.gl.R8_SNORM,
+    //this.opts.filter.shape.w,
+    //this.opts.filter.shape.h,
+    //0,
+    //this.gl.RED,
+    //this.gl.BYTE,
+    //new Int8Array(_data.map((i) => (i < 0 ? 128 : 127))) // 128=-1, 127=1
+    //);
     this.gl.bindTexture(this.gl.TEXTURE_2D, null);
   }
 
@@ -161,7 +164,10 @@ export default class Conv2D extends Core {
     let w, h;
     switch (_type) {
       case 'down':
-        w = h = this.opts.filter.size * this.opts.filter.num;
+        w = h =
+          this.opts.filter.size *
+          this.opts.filter.num *
+          this.opts.prev.num_filters;
         return { w: w, h: h };
       case 'up':
         w = h =

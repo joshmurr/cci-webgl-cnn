@@ -1,3 +1,5 @@
+/* This is a slightly modified version of: https://github.com/aplbrain/npyjs */
+
 export default class NP_Loader {
   constructor() {
     this.dtypes = {
@@ -55,7 +57,6 @@ export default class NP_Loader {
   }
 
   parse(arrayBufferContents) {
-    // const version = arrayBufferContents.slice(6, 8); // Uint8-encoded
     const headerLength = new DataView(
       arrayBufferContents.slice(8, 10)
     ).getUint8(0);
@@ -84,41 +85,14 @@ export default class NP_Loader {
     };
   }
 
-  async loadTwo(filename, callback) {
+  async load(filename, callback) {
     let self = this;
     const file = await fetch(filename);
     if (file.ok) {
       const blob = await file.blob();
       return blob.arrayBuffer().then((buffer) => {
-        const res = self.parse(buffer);
-        return res;
+        return self.parse(buffer);
       });
     }
-  }
-
-  async load(filename, callback) {
-    let self = this;
-    return fetch(filename)
-      .then((fh) => {
-        if (fh.ok) {
-          return fh
-            .blob()
-            .then((i) => {
-              var content = i;
-              var reader = new FileReader();
-              reader.addEventListener('loadend', function () {
-                var text = reader.result;
-                var res = self.parse(text);
-                if (callback) {
-                  return callback(res);
-                }
-                return res;
-              });
-              reader.readAsArrayBuffer(content);
-            })
-            .catch((err) => console.error(err));
-        }
-      })
-      .catch((err) => console.error(err));
   }
 }
