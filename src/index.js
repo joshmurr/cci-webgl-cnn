@@ -34,12 +34,18 @@ const webcam = document.getElementById('video');
 const webcamHandler = new WebcamHandler(webcam);
 
 let PLAY = false;
+const play_stop = {
+  true: 'Stop',
+  false: 'Play',
+};
+
 const buttons = document.getElementsByTagName('button');
 buttons[0].addEventListener('click', (e) => webcamHandler.initCam());
 buttons[1].addEventListener('click', (e) => webcamHandler.stopCam());
 buttons[2].addEventListener('click', (e) => draw(gl));
 buttons[3].addEventListener('click', (e) => {
   PLAY = !PLAY;
+  buttons[3].innerText = play_stop[PLAY];
   draw();
 });
 

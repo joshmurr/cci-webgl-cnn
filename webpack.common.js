@@ -4,7 +4,8 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 module.exports = {
-  entry: './src/index.js',
+  //entry: './src/index.js',
+  entry: './src/8_layer.js',
   plugins: [
     new CleanWebpackPlugin(),
     new MiniCssExtractPlugin(),
