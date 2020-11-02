@@ -3,7 +3,6 @@ import Core from './core_class.js';
 export default class Conv2D extends Core {
   constructor(gl, _opts, _program) {
     super(gl);
-
     this.program = this.createProgram(_program.vs, _program.fs);
 
     // Default options:

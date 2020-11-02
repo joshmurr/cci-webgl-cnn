@@ -249,12 +249,6 @@ gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(verts), gl.STATIC_DRAW);
 gl.enableVertexAttribArray(OUTPUT_posAttrLoc);
 gl.vertexAttribPointer(OUTPUT_posAttrLoc, 2, gl.FLOAT, false, 0, 0);
 
-const OUTPUT_resolutionLoc = gl.getUniformLocation(OUTPUT, 'u_resolution');
-const OUTPUT_screen_resolutionLoc = gl.getUniformLocation(
-  OUTPUT,
-  'u_screen_resolution'
-);
-
 // Texture Coords
 const OUTPUT_texAttrLoc = gl.getAttribLocation(OUTPUT, 'a_texcoord');
 const OUTPUT_texBuffer = gl.createBuffer();

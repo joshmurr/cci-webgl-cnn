@@ -32,7 +32,7 @@ void main(){
 
       vec2 conv = vec2(c_x, c_y);
       vec2 offset_st = input_st + conv;
-      vec2 offset_filter = filter_offset;// + conv;
+      vec2 offset_filter = filter_offset + conv * u_filter_texel_size;
 
       float sum_row = 0.0;
       for(float y=-0.75; y<1.0; y+=0.5){
