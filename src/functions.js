@@ -136,10 +136,6 @@ export function generateFour(num_channels) {
   return new Uint8Array(data);
 }
 
-const sixt = () => Math.floor(255 * 0.0625);
-const quar = () => Math.floor(255 * 0.25);
-const eith = () => Math.floor(255 * 0.125);
-
 export function filter() {
   // Red Filter
   let filter = [

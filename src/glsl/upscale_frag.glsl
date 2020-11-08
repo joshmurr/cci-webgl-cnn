@@ -4,6 +4,8 @@ precision highp sampler2D;
 
 uniform sampler2D u_texture; // (16*NUM_FILTERS)x(16*NUM_FILTERS)x1(RED)
 uniform sampler2D u_filter;  // (4*NUM_FILTERS)x(4*NUM_FILTERS)x1(RED)
+uniform sampler2D u_bias;  // 4x4x3
+
 uniform vec2 u_filter_size; 
 uniform vec2 u_num_filters; // (2, 2)
 uniform vec2 u_num_filters_prev; // (4, 4)
@@ -15,7 +17,7 @@ out vec4 outColor;
 
 float get(vec2 _st, vec2 _filter_offset, vec2 _offset){
   float tex_lookup = texture(u_texture, _st + (_offset * u_input_texel_size)).r;// * 2.0 - 1.0;
-  float filter_lookup = texture(u_filter, _filter_offset + (((_offset*2.0)+vec2(1.5)) * u_filter_texel_size)).r;// * 2.0 - 1.0;
+  float filter_lookup = texture(u_filter, u_filter_texel_size + _filter_offset + (((_offset*2.0)+vec2(1.5)) * u_filter_texel_size)).r * 2.0 - 1.0;
 
   return tex_lookup * filter_lookup;
 } 
@@ -47,11 +49,12 @@ void main(){
   }
 
   //float scale = pow(u_num_filters_prev.x, u_num_filters.y);
-  float scale = pow(1.25, u_num_filters_prev.y);
+  float scale = pow(u_num_filters_prev.x, u_num_filters_prev.y);
   //float scale = u_num_filters_prev.x * u_num_filters_prev.y;
-  float sum = sum_filters / scale;
+  float sum = sum_filters;// / scale;
 
-  outColor = vec4(sum, 0.0, 0.0, 1.0);
+  //outColor = vec4(sum, 0.0, 0.0, 1.0);
+  outColor = vec4(sum, 0.0, 0.0, 1.0) + (texture(u_bias, filter_offset + (1.0 / u_num_filters)) * 2.0 - 1.0);
   //outColor = texture(u_texture, gl_FragCoord.xy / u_output_size);
 }
 

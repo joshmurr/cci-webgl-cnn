@@ -42,7 +42,8 @@ export default class Conv2D extends Core {
       // Textures
       input_tex: this.gl.getUniformLocation(this.program, 'u_texture'),
       filters_tex: this.gl.getUniformLocation(this.program, 'u_filter'),
-      filters_smask: this.gl.getUniformLocation(this.program, 'u_filter_smask'),
+      bias_tex: this.gl.getUniformLocation(this.program, 'u_bias'),
+      //filters_smask: this.gl.getUniformLocation(this.program, 'u_filter_smask'),
       //
       texel_size: this.gl.getUniformLocation(
         this.program,
@@ -102,15 +103,15 @@ export default class Conv2D extends Core {
       format: this.gl[format],
     });
 
-    // FILTER SIGNED MASK ------------------------------
-    //this.filters_smask = this.createTexture({
-    //width: this.opts.filter.shape.w,
-    //height: this.opts.filter.shape.h,
-    //data: null,
-    //internalFormat: this.gl.R8_SNORM,
-    //format: this.gl.RED,
-    //dataType: this.gl.BYTE,
-    //});
+    // BIASES ------------------------------------------
+    this.bias_tex = this.createTexture({
+      width: this.opts.filter.num,
+      height: this.opts.filter.num,
+      data: null,
+      internalFormat: this.gl.R32F,
+      format: this.gl.RED,
+      dataType: this.gl.FLOAT,
+    });
 
     // OUTPUT -------------------------------------------
     ({ internalFormat, format } = this.getTextureFormat(
@@ -126,13 +127,10 @@ export default class Conv2D extends Core {
   }
 
   updateFilterData(_data) {
-    //this.gl.activeTexture(this.gl.TEXTURE0);
     this.gl.bindTexture(this.gl.TEXTURE_2D, this.filters_tex);
     const { internalFormat, format } = this.getTextureFormat(
       this.opts.filter.num_channels
     );
-
-    console.log(_data.shape);
 
     this.gl.texImage2D(
       this.gl.TEXTURE_2D,
@@ -143,22 +141,27 @@ export default class Conv2D extends Core {
       0,
       this.gl.RED,
       this.gl.FLOAT,
-      _data.data.map((i) => (i + 1.0) * 0.5)
+      _data.data
+    );
+  }
+
+  updateInputData(_data) {
+    this.gl.bindTexture(this.gl.TEXTURE_2D, this.input_tex);
+    const { internalFormat, format } = this.getTextureFormat(
+      this.opts.input.num_channels
     );
 
-    //this.gl.bindTexture(this.gl.TEXTURE_2D, this.filters_smask);
-    //this.gl.texImage2D(
-    //this.gl.TEXTURE_2D,
-    //0,
-    //this.gl.R8_SNORM,
-    //this.opts.filter.shape.w,
-    //this.opts.filter.shape.h,
-    //0,
-    //this.gl.RED,
-    //this.gl.BYTE,
-    //new Int8Array(_data.map((i) => (i < 0 ? 128 : 127))) // 128=-1, 127=1
-    //);
-    this.gl.bindTexture(this.gl.TEXTURE_2D, null);
+    this.gl.texImage2D(
+      this.gl.TEXTURE_2D,
+      0,
+      this.gl.R32F,
+      this.opts.input.size,
+      this.opts.input.size,
+      0,
+      this.gl.RED,
+      this.gl.FLOAT,
+      _data.data
+    );
   }
 
   updateInputTexture(_elem) {
@@ -178,6 +181,22 @@ export default class Conv2D extends Core {
       _elem
     );
     this.gl.bindTexture(this.gl.TEXTURE_2D, null);
+  }
+
+  updateBiasData(_data) {
+    console.log(_data.data);
+    this.gl.bindTexture(this.gl.TEXTURE_2D, this.bias_tex);
+    this.gl.texImage2D(
+      this.gl.TEXTURE_2D,
+      0,
+      this.gl.R32F,
+      this.opts.filter.num,
+      this.opts.filter.num,
+      0,
+      this.gl.RED,
+      this.gl.FLOAT,
+      _data.data
+    );
   }
 
   getFilterShape(_type) {
@@ -216,6 +235,10 @@ export default class Conv2D extends Core {
 
   get filter() {
     return this.filters_tex;
+  }
+
+  get bias() {
+    return this.bias_tex;
   }
 
   forward() {

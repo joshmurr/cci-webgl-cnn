@@ -6,13 +6,18 @@ import {
   handleFileInput,
 } from './functions.js';
 import Conv2D from './conv2d_class.js';
-//import NP_Loader from './numpy_loader.js';
+import NP_Loader from './numpy_loader.js';
 import WebcamHandler from './webcam_handler.js';
 import './styles.css';
-//import D1 from './filters/tf-autoencoder/encoder/conv2d_6_kernel.npy';
-//import D2 from './filters/tf-autoencoder/encoder/conv2d_7_kernel.npy';
-//import U1 from './filters/tf-autoencoder/decoder/conv2d_transpose_4_kernel.npy';
-//import U2 from './filters/tf-autoencoder/decoder/conv2d_transpose_5_kernel.npy';
+import SHOE from './sample_images/shoe.npy';
+import D1 from './filters/pytorch-autoencoder/conv1.npy';
+import D2 from './filters/pytorch-autoencoder/conv2.npy';
+import U1 from './filters/pytorch-autoencoder/t_conv1.npy';
+import U2 from './filters/pytorch-autoencoder/t_conv2.npy';
+import D1_bias from './filters/pytorch-autoencoder/conv1_bias.npy';
+import D2_bias from './filters/pytorch-autoencoder/conv2_bias.npy';
+import U1_bias from './filters/pytorch-autoencoder/t_conv1_bias.npy';
+import U2_bias from './filters/pytorch-autoencoder/t_conv2_bias.npy';
 
 const BASIC_VERT = require('./glsl/basic_vert.glsl');
 
@@ -29,7 +34,7 @@ if (!gl) console.error('No WebGL2 support!');
 const verts =      [-1, -1, -1, 1,  1, -1,   -1, 1, 1,  1, 1, -1]; //prettier-ignore
 const tex_coords = [ 0,  1,  0, 0,  1,  1,    0, 0, 1,  0, 1,  1]; //prettier-ignore
 
-//const np_loader = new NP_Loader();
+const np_loader = new NP_Loader();
 const webcam = document.getElementById('video');
 const webcamHandler = new WebcamHandler(webcam);
 
@@ -53,35 +58,41 @@ const __DOWNSCALE = new Conv2D(
   gl,
   {
     input: {
-      size: 32,
-      num_channels: 3,
-      data: generateFour(3),
-      //data: generateImageData(32, 32, 3),
-      //texture: __DOWNSCALE_a.output,
+      size: 28,
+      num_channels: 1,
     },
     output: {
-      size: 16,
+      size: 14,
       num_channels: 1,
     },
     filter: {
-      num_channels: 3,
-      num: 16,
+      num_channels: 1,
+      num: 4,
       type: 'down',
+    },
+    prev: {
+      num_filters: 1,
     },
   },
   {
     vs: BASIC_VERT,
-    fs: require('./glsl/downscale_frag.glsl'),
+    fs: require('./glsl/downscale_2_frag.glsl'),
   }
 );
-//np_loader.load(D1).then((r) => {
-//console.group('Downscale 1');
-//console.log(__DOWNSCALE.opts.filter.shape);
-//console.log(r);
-//console.groupEnd();
-//__DOWNSCALE.updateFilterData(r);
-//draw(gl);
-//});
+np_loader.load(SHOE).then((r) => {
+  __DOWNSCALE.updateInputData(r);
+});
+np_loader.load(D1).then((r) => {
+  console.group('Downscale 1');
+  console.log(__DOWNSCALE.opts.filter.shape);
+  console.log(r);
+  console.groupEnd();
+  __DOWNSCALE.updateFilterData(r);
+  draw(gl);
+});
+np_loader.load(D1_bias).then((r) => {
+  __DOWNSCALE.updateBiasData(r);
+});
 
 const __DOWNSCALE_2 = new Conv2D(
   gl,
@@ -92,12 +103,12 @@ const __DOWNSCALE_2 = new Conv2D(
       texture: __DOWNSCALE.output,
     },
     output: {
-      size: 8,
+      size: 7,
       num_channels: 1,
     },
     filter: {
       num_channels: 1,
-      num: 22,
+      num: 2,
       type: 'down',
     },
     prev: {
@@ -109,67 +120,17 @@ const __DOWNSCALE_2 = new Conv2D(
     fs: require('./glsl/downscale_2_frag.glsl'),
   }
 );
-//np_loader.load(D2).then((r) => {
-//console.group('Downscale 2');
-//console.log(__DOWNSCALE_2.opts.filter.shape);
-//console.log(r);
-//console.groupEnd();
-//__DOWNSCALE_2.updateFilterData(r);
-//draw(gl);
-//});
-
-//const __DOWNSCALE_3 = new Conv2D(
-//gl,
-//{
-//input: {
-//size: __DOWNSCALE_2.opts.output.size,
-//num_channels: 1,
-//texture: __DOWNSCALE_2.output,
-//},
-//output: {
-//size: 4,
-//num_channels: 1,
-//},
-//filter: {
-//num_channels: 1,
-//num: 22,
-//type: 'down',
-//},
-//prev: {
-//num_filters: __DOWNSCALE.opts.filter.num,
-//},
-//},
-//{
-//vs: BASIC_VERT,
-//fs: require('./glsl/downscale_2_frag.glsl'),
-//}
-//);
-//const __UPSCALE_a = new Conv2D(
-//gl,
-//{
-//input: {
-//size: __DOWNSCALE_3.opts.output.size,
-//num_channels: 1,
-//texture: __DOWNSCALE_3.output,
-//},
-//output: {
-//size: 8,
-//num_channels: 1,
-//},
-//filter: {
-//num_channels: 1,
-//num: 22,
-//type: 'up',
-//},
-//prev: {
-//num_filters: __DOWNSCALE_3.opts.filter.num,
-//},
-//},
-//{
-//vs: BASIC_VERT,
-//fs: require('./glsl/upscale_frag.glsl'),
-//}
-//);
+np_loader.load(D2).then((r) => {
+  console.group('Downscale 2');
+  console.log(__DOWNSCALE_2.opts.filter.shape);
+  console.log(r);
+  console.groupEnd();
+  __DOWNSCALE_2.updateFilterData(r);
+  draw(gl);
+});
+np_loader.load(D2_bias).then((r) => {
+  __DOWNSCALE_2.updateBiasData(r);
+});
 
 const __UPSCALE = new Conv2D(
   gl,
@@ -180,12 +141,12 @@ const __UPSCALE = new Conv2D(
       texture: __DOWNSCALE_2.output,
     },
     output: {
-      size: 16,
+      size: 14,
       num_channels: 1,
     },
     filter: {
       num_channels: 1,
-      num: 16,
+      num: 4,
       type: 'up',
     },
     prev: {
@@ -197,14 +158,17 @@ const __UPSCALE = new Conv2D(
     fs: require('./glsl/upscale_frag.glsl'),
   }
 );
-//np_loader.load(U1).then((r) => {
-//console.group('Upscale');
-//console.log(__UPSCALE.opts.filter.shape);
-//console.log(r);
-//console.groupEnd();
-//__UPSCALE.updateFilterData(r);
-//draw(gl);
-//});
+np_loader.load(U1).then((r) => {
+  console.group('Upscale 1');
+  console.log(__UPSCALE.opts.filter.shape);
+  console.log(r);
+  console.groupEnd();
+  __UPSCALE.updateFilterData(r);
+  draw(gl);
+});
+np_loader.load(U1_bias).then((r) => {
+  __UPSCALE.updateBiasData(r);
+});
 
 const __UPSCALE_2 = new Conv2D(
   gl,
@@ -215,11 +179,11 @@ const __UPSCALE_2 = new Conv2D(
       texture: __UPSCALE.output,
     },
     output: {
-      size: 32,
-      num_channels: 3,
+      size: 28,
+      num_channels: 1,
     },
     filter: {
-      num_channels: 3,
+      num_channels: 1,
       num: 1,
       type: 'output',
     },
@@ -229,13 +193,20 @@ const __UPSCALE_2 = new Conv2D(
   },
   {
     vs: BASIC_VERT,
-    fs: require('./glsl/upscale_2_frag.glsl'),
+    fs: require('./glsl/upscale_frag.glsl'),
   }
 );
-//np_loader.load(U2).then((r) => {
-//__UPSCALE_2.updateFilterData(r);
-//draw(gl);
-//});
+np_loader.load(U2).then((r) => {
+  console.group('Upscale 2');
+  console.log(__UPSCALE_2.opts.filter.shape);
+  console.log(r);
+  console.groupEnd();
+  __UPSCALE_2.updateFilterData(r);
+  draw(gl);
+});
+np_loader.load(U2_bias).then((r) => {
+  __UPSCALE_2.updateBiasData(r);
+});
 
 // OUTPUT PROGRAM --------------------------------------------------------
 const OUTPUT = createProgram(gl, output.vs, output.fs);
@@ -312,6 +283,7 @@ function draw() {
   gl.uniform1i(OUTPUT_texLoc, 0);
   gl.activeTexture(gl.TEXTURE0 + 0);
   gl.bindTexture(gl.TEXTURE_2D, __UPSCALE_2.output);
+  //gl.bindTexture(gl.TEXTURE_2D, __UPSCALE_2.bias);
 
   gl.enable(gl.SCISSOR_TEST);
   const filter_size = 64;
@@ -372,7 +344,7 @@ function draw() {
   gl.disable(gl.SCISSOR_TEST);
   gl.bindVertexArray(null);
   gl.bindBuffer(gl.ARRAY_BUFFER, null);
-  console.log(performance.now() - start);
+  //console.log(performance.now() - start);
 
   if (PLAY) {
     requestAnimationFrame(draw);
