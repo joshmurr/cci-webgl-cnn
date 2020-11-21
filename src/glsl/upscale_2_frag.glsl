@@ -44,6 +44,6 @@ void main(){
       sum_filters += sum_row / pow(1.5, u_num_filters_prev.x);
     }
   }
-  outColor = vec4(sum_filters, 1.0);
+  outColor = vec4(sum_filters, 1.0) - 1.9;
 }
 

@@ -65,7 +65,7 @@ const __DOWNSCALE = new Conv2D(
     },
     filter: {
       num_channels: 3,
-      num: 16,
+      num: 8,
       type: 'down',
     },
   },
@@ -74,14 +74,6 @@ const __DOWNSCALE = new Conv2D(
     fs: require('./glsl/downscale_frag.glsl'),
   }
 );
-//np_loader.load(D1).then((r) => {
-//console.group('Downscale 1');
-//console.log(__DOWNSCALE.opts.filter.shape);
-//console.log(r);
-//console.groupEnd();
-//__DOWNSCALE.updateFilterData(r);
-//draw(gl);
-//});
 
 const __DOWNSCALE_2 = new Conv2D(
   gl,
@@ -97,7 +89,7 @@ const __DOWNSCALE_2 = new Conv2D(
     },
     filter: {
       num_channels: 1,
-      num: 22,
+      num: 16,
       type: 'down',
     },
     prev: {
@@ -109,67 +101,6 @@ const __DOWNSCALE_2 = new Conv2D(
     fs: require('./glsl/downscale_2_frag.glsl'),
   }
 );
-//np_loader.load(D2).then((r) => {
-//console.group('Downscale 2');
-//console.log(__DOWNSCALE_2.opts.filter.shape);
-//console.log(r);
-//console.groupEnd();
-//__DOWNSCALE_2.updateFilterData(r);
-//draw(gl);
-//});
-
-//const __DOWNSCALE_3 = new Conv2D(
-//gl,
-//{
-//input: {
-//size: __DOWNSCALE_2.opts.output.size,
-//num_channels: 1,
-//texture: __DOWNSCALE_2.output,
-//},
-//output: {
-//size: 4,
-//num_channels: 1,
-//},
-//filter: {
-//num_channels: 1,
-//num: 22,
-//type: 'down',
-//},
-//prev: {
-//num_filters: __DOWNSCALE.opts.filter.num,
-//},
-//},
-//{
-//vs: BASIC_VERT,
-//fs: require('./glsl/downscale_2_frag.glsl'),
-//}
-//);
-//const __UPSCALE_a = new Conv2D(
-//gl,
-//{
-//input: {
-//size: __DOWNSCALE_3.opts.output.size,
-//num_channels: 1,
-//texture: __DOWNSCALE_3.output,
-//},
-//output: {
-//size: 8,
-//num_channels: 1,
-//},
-//filter: {
-//num_channels: 1,
-//num: 22,
-//type: 'up',
-//},
-//prev: {
-//num_filters: __DOWNSCALE_3.opts.filter.num,
-//},
-//},
-//{
-//vs: BASIC_VERT,
-//fs: require('./glsl/upscale_frag.glsl'),
-//}
-//);
 
 const __UPSCALE = new Conv2D(
   gl,
@@ -185,7 +116,7 @@ const __UPSCALE = new Conv2D(
     },
     filter: {
       num_channels: 1,
-      num: 16,
+      num: 8,
       type: 'up',
     },
     prev: {
@@ -197,14 +128,6 @@ const __UPSCALE = new Conv2D(
     fs: require('./glsl/upscale_frag.glsl'),
   }
 );
-//np_loader.load(U1).then((r) => {
-//console.group('Upscale');
-//console.log(__UPSCALE.opts.filter.shape);
-//console.log(r);
-//console.groupEnd();
-//__UPSCALE.updateFilterData(r);
-//draw(gl);
-//});
 
 const __UPSCALE_2 = new Conv2D(
   gl,
@@ -232,10 +155,6 @@ const __UPSCALE_2 = new Conv2D(
     fs: require('./glsl/upscale_2_frag.glsl'),
   }
 );
-//np_loader.load(U2).then((r) => {
-//__UPSCALE_2.updateFilterData(r);
-//draw(gl);
-//});
 
 // OUTPUT PROGRAM --------------------------------------------------------
 const OUTPUT = createProgram(gl, output.vs, output.fs);

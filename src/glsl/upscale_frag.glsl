@@ -51,7 +51,7 @@ void main(){
   //float scale = u_num_filters_prev.x * u_num_filters_prev.y;
   float sum = sum_filters / scale;
 
-  outColor = vec4(sum, 0.0, 0.0, 1.0);
+  outColor = vec4(sum, 0.0, 0.0, 1.0) * 0.5;
   //outColor = texture(u_texture, gl_FragCoord.xy / u_output_size);
 }
 
