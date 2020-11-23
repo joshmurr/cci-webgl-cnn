@@ -80,7 +80,7 @@ For now, it was shown that a full size [Pix2Pix][p2p] style generator ran at the
 
 [__A demo of a Pix2Pix model running in the browser for real-time video interaction can be seen here__][ltlts].
 
-### [More information about this WebGL CNN stuff can be seen here][https://joshmurr.github.io/cci-thesis-log/webgl/cnn/2020/11/21/webgl-cnn-followup.html]
+### [More information about this WebGL CNN stuff can be seen here](https://joshmurr.github.io/cci-thesis-log/webgl/cnn/2020/11/21/webgl-cnn-followup.html)
 
 [p2p]: https://phillipi.github.io/pix2pix/
 [tfjs]: https://github.com/tensorflow/tfjs
